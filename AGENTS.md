@@ -40,8 +40,8 @@
 - `src/app/store.ts` и `src/app/hooks.ts` — store и типизированные хуки. Не создавай второй store.
 - `src/features/ui/uiSlice.ts` — client-only UI состояние (тема, sidebar). Не храни в нём данные backend.
 - `src/components/ui/` — компоненты shadcn/ui. Ставь новые через официальный CLI, не копируй вручную.
-- `src/components/layout/`, `src/components/shared/` — будущие общие компоненты.
-- `src/pages/<Section>/` — каталоги-заготовки. Полноценные страницы пока не создавать.
+- `src/components/layout/` — общий shell и навигация; `src/components/shared/` — общие UI-компоненты разделов.
+- `src/pages/<Section>/` — страницы разделов; текущая реализация визуальная, без backend и бизнес-логики.
 - `src/styles/index.css` — единственный глобальный CSS с темами и токенами.
 - Добавленные shadcn `tw-animate-css`/Geist и eject-стили уже зафиксированы; не откатывай их.
 
@@ -82,6 +82,7 @@
 - Единственный источник адреса — `VITE_API_BASE_URL` из `.env` (шаблон в `.env.example`).
 - Не придумывай URL для debts, contacts, folders, payments, users, archive или любых других ресурсов.
 - Не изменяй backend и не создавай базу данных/моковый сервер.
+- Временные UI-данные допустимы только в `src/mocks/mockData.ts` и не должны выдаваться за backend.
 - Сначала изучи реальные запросы/ответы backend, затем добавляй типы и endpoint’ы.
 
 ## Premium Fintech Design

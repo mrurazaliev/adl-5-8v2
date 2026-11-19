@@ -269,3 +269,97 @@
 
 - Создать коммит только с изменениями `TASKS.md` и `DEVELOPMENT_LOG.md` и сообщить SHA владельцу.
 - Новые функции и бизнес-логику не начинать без явной просьбы.
+
+---
+
+## 2026-11-19 — Визуальный UI всех разделов ADL58 V2
+
+### Что реализовано
+
+- Создан единый layout: `AppShell` с desktop sidebar, мобильным `Sheet`, header с кнопкой меню, переключателем темы и выбором языка.
+- Создан `SidebarNavigation` с активным state через `NavLink`; профиль и рекламные блоки не добавлены.
+- В `src/main.tsx` объявлены маршруты `/`, `/debts`, `/contacts`, `/folders`, `/payments`, `/users`, `/archive` и fallback на `/`.
+- Реализованы страницы: Dashboard (карточки, AreaChart, PieChart, таблица, быстрые действия), Debts (карточки, поиск, фильтры, вкладки, таблица, модалки), Contacts (карточки контактов, фильтры, модалки), Folders (карточки категорий, создание/управление), Payments (карточки, таблица, вкладки, просмотр/редактирование), Users (роли, статусы, таблица), Archive (таблица, действия, состояние пустого списка).
+- Добавлены shared-компоненты `PageHeader`, `StatCard`, `StatusBadge`, `FilterBar`, `DemoActionDialog`, `EmptyState`.
+- Добавлены статические UI-данные только в `src/mocks/mockData.ts`.
+- Расширены переводы i18n для навигации, страниц и common-действий.
+
+### Изменённые файлы
+
+- `src/main.tsx`, `src/App.tsx`, `src/i18n/index.ts`.
+- `src/components/layout/AppShell.tsx`, `src/components/layout/SidebarNavigation.tsx`.
+- `src/components/shared/PageHeader.tsx`, `src/components/shared/StatCard.tsx`, `src/components/shared/StatusBadge.tsx`, `src/components/shared/FilterBar.tsx`, `src/components/shared/DemoActionDialog.tsx`, `src/components/shared/EmptyState.tsx`.
+- `src/mocks/mockData.ts`.
+- `src/pages/*/*.tsx` — семь страниц разделов.
+- `PROJECT_CONTEXT.md`, `TASKS.md`, `DEVELOPMENT_LOG.md`.
+
+### Проблемы
+
+- Встроенный image reader не смог прочитать PNG-макеты: `File format not supported by image reader`.
+- OCR-инструменты недоступны: `tesseract` не найден, `pytesseract` и `PIL` отсутствуют.
+- Каталог `design-references/` отсутствует; макеты находятся в `ADL58_V2_Designs/`.
+- Первый прогон `typecheck` нашёл три обращения к несуществующим полям mock-строк: `ArchiveRow.name`, `ArchiveRow.date`, `UserRow.phone`.
+- Сборка выдаёт предупреждение Vite о размере JS-чанка (~966 kB).
+
+### Решения
+
+- UI сверялся с `ADL58_V2_Designs/README.txt` и текстовыми требованиями задачи; расхождение зафиксировано в документах.
+- Ошибки типов исправлены: используются реальные поля `ArchiveRow.title`, `ArchiveRow.archivedAt` и `UserRow.lastActive`.
+- Все действия, требующие backend, оставлены как демо: модалки открываются, сохранение отключено, фильтры и search не изменяют данные.
+- Временные данные размещены только в `src/mocks/mockData.ts`; mock API, мутации, CRUD и финансовые расчёты не добавлены.
+- Точный состав полей форм и вопросы по архиву/макетам вынесены в `TASKS.md`.
+- `ADL58_V2_Designs/` и `ADL58_V2_Premium_Fintech_Images.zip` оставлены неотслеживаемыми: включение дизайн-макетов в Git требует решения владельца.
+
+### Результаты проверок
+
+- `npm run lint` — успешно.
+- `npm run typecheck` — успешно.
+- `npm run build` — успешно, 2686 модулей, только warning о размере чанка.
+- Браузерная проверка адаптивности и консоли в текущем окружении не выполнялась.
+
+### Далее
+
+- Создать коммит с изменениями UI-этапа и сообщить SHA владельцу.
+- После получения контрактов backend заменить демо-диалоги на RHF + Zod компоненты.
+- Проверить визуальное соответствие макетам в окружении с поддержкой просмотра изображений.
+
+---
+
+## 2026-11-19 — Проверка и завершение UI-этапа после ECONNRESET
+
+### Что проверено
+
+- Повторно прочитаны `AGENTS.md`, `PROJECT_CONTEXT.md`, `CODING_STYLE.md`, `TASKS.md` и последняя запись `DEVELOPMENT_LOG.md`.
+- `git status --short` подтвердил: изменения только в документах, `src/App.tsx`, `src/i18n/index.ts`, `src/main.tsx` и новых каталогах `src/components/layout`, `src/components/shared`, `src/mocks`, `src/pages`.
+- Прочитаны и сверены все файлы UI-этапа: entry point, layout, shared components, mock data, i18n и семь страниц.
+- Подтверждено наличие всех страниц: Dashboard, Debts, Contacts, Folders, Payments, Users, Archive.
+- Подтверждены маршруты `/`, `/debts`, `/contacts`, `/folders`, `/payments`, `/users`, `/archive` и fallback `*` → `/`; пункты `SidebarNavigation` соответствуют маршрутам.
+- Grep по страницам не нашёл `fetch`, `axios`, `useMutation`, `injectEndpoints` и HTTP-методов.
+
+### Изменённые файлы
+
+- `TASKS.md`, `PROJECT_CONTEXT.md`, `DEVELOPMENT_LOG.md`.
+
+### Проблемы
+
+- Готовые компоненты не требовали переписывания; незавершённых UI-файлов не обнаружено.
+- Браузерная проверка недоступна, визуальное сравнение с PNG-макетами остаётся открытым вопросом.
+- Vite по-прежнему предупреждает о размере JS-чанка (~966 kB).
+
+### Решения
+
+- Изменения ограничены финальной верификацией и обновлением документации.
+- Коммит создаётся только с исходным кодом и документацией текущего этапа; `ADL58_V2_Designs/` и ZIP-архив не добавляются.
+- Push и следующий этап не выполняются.
+
+### Результаты проверок
+
+- `npm run lint` — успешно.
+- `npm run typecheck` — успешно.
+- `npm run build` — успешно, 2686 модулей, только warning о размере чанка.
+- `git diff --check` — без ошибок.
+
+### Далее
+
+- Отчитаться о результатах и передать SHA коммита.
+- Не начинать backend/CRUD/RHF+Zod этап без отдельного разрешения.

@@ -4,7 +4,7 @@
 
 ## 1. Текущий статус
 
-Проект находится на этапе **завершённой инициализации**. Реализована только стартовая страница. CRUD, бизнес-логика, страницы разделов, реальные API-запросы и авторизация **не реализованы**.
+Проект находится на этапе **визуального UI-каркаса всех разделов**. Реализованы layout, навигация, восемь маршрутов и страницы Dashboard, Debts, Contacts, Folders, Payments, Users, Archive на демонстрационных данных из `src/mocks/mockData.ts`. CRUD, бизнес-логика, реальные API-запросы, авторизация и сохранение данных **не реализованы**.
 
 Git-репозиторий инициализирован в корне проекта. Начальный коммит: `d9a690a694345fbdf41169cdcb76a594e26ef694` (`chore: initialize ADL58 V2 frontend project`). Push не выполнялся.
 
@@ -53,8 +53,8 @@ src/
   assets/
   components/
     ui/          # сгенерировано shadcn CLI
-    layout/      # каталог-заготовка
-    shared/      # каталог-заготовка
+    layout/      # AppShell, SidebarNavigation
+    shared/      # PageHeader, StatCard, StatusBadge, FilterBar, DemoActionDialog, EmptyState
   features/
     ui/
       uiSlice.ts
@@ -63,10 +63,16 @@ src/
     index.ts
   lib/
     utils.ts
+  mocks/
+    mockData.ts            # только временные UI-данные, не backend
   pages/
-    Dashboard/ Contacts/ Archive/
-    Debts/     Folders/  Payments/
-    Users/                 # каталоги-заготовки, файлов нет
+    Dashboard/DashboardPage.tsx
+    Debts/DebtsPage.tsx
+    Contacts/ContactsPage.tsx
+    Folders/FoldersPage.tsx
+    Payments/PaymentsPage.tsx
+    Users/UsersPage.tsx
+    Archive/ArchivePage.tsx
   styles/
     index.css
   types/
@@ -84,13 +90,18 @@ src/
 
 ## 6. Маршрутизация и страницы
 
-В `src/main.tsx` настроены `Provider`, `BrowserRouter`, `TooltipProvider`, `Routes` и `Toaster`. Пока объявлен только один маршрут:
+В `src/main.tsx` настроены `Provider`, `BrowserRouter` и `Routes`. Маршруты:
 
-- `/` → `App`.
+- `/` → `DashboardPage` (index)
+- `/debts` → `DebtsPage`
+- `/contacts` → `ContactsPage`
+- `/folders` → `FoldersPage`
+- `/payments` → `PaymentsPage`
+- `/users` → `UsersPage`
+- `/archive` → `ArchivePage`
+- `*` → `Navigate to="/"`
 
-`src/App.tsx` — минимальный стартовый экран: заголовок `ADL58 V2`, подзаголовок из i18n, `Card` и кнопка shadcn/ui, переключающая тему через `uiSlice`.
-
-Запланированные разделы по условию задачи: Dashboard, Debts, Contacts, Folders, Payments, Users, Archive. Соответствующие каталоги созданы, но компоненты страниц и маршруты для них **не созданы**.
+`src/App.tsx` — тонкая обёртка над `AppShell`. `AppShell` содержит desktop sidebar, мобильный `Sheet`, header с кнопкой меню, переключателем темы и выбором языка; страницы рендерятся через `Outlet`. Активная навигация определяется `NavLink` в `SidebarNavigation`.
 
 ## 7. Redux Architecture
 
@@ -111,7 +122,7 @@ src/
 - Состояние: `theme: 'light' | 'dark'`, `sidebarOpen: boolean`.
 - Actions: `setTheme`, `toggleTheme`, `setSidebarOpen`, `toggleSidebar`.
 - Начальные значения: `theme: 'light'`, `sidebarOpen: false`.
-- В `App.tsx` тема применяется классом `.dark` на `document.documentElement`.
+- В `AppShell` тема применяется классом `.dark` на `document.documentElement`.
 
 Серверные данные не хранятся в обычных Redux slice.
 
@@ -131,8 +142,9 @@ src/
 
 - Языки: `ru`, `tj`, `en`.
 - Язык по умолчанию и fallback: `ru`.
-- Минимальные ключи: `appTitle`, `subtitle`, `toggleTheme`.
-- Переводы остальных разделов будут добавляться позже.
+- Ключи: `appTitle`, `subtitle`, `toggleTheme`, `language`, `navigation`, `demoMode`, группы `nav`, `common`, `pages`.
+- Переводы добавлены для всех заголовков страниц, навигации и общих действий; детали DemoActionDialog пока заданы текстом в компонентах.
+- Переключатель языка в `AppShell` вызывает `i18n.changeLanguage`.
 
 ## 10. Design System
 
@@ -152,7 +164,7 @@ src/
 - backend существует и запущен локально **по условию задачи**, но его исходники и endpoint’ы в этом репозитории недоступны.
 - Реальные пути, форматы запросов/ответов и механизм авторизации не изучены.
 - Нельзя придумывать URL для debts, contacts, folders, payments, users, archive и других ресурсов.
-- Не создавать mock backend, базу данных, моковые данные или фейковые хуки.
+- Не создавать mock backend, базу данных или фейковые хуки. Временные UI-данные для визуального каркаса допустимы только в `src/mocks/mockData.ts` и не должны выдаваться за данные backend.
 - Не изменять backend.
 - Перед добавлением endpoint’ов нужно изучить реальные запросы/ответы backend и только затем описывать типы.
 
@@ -168,6 +180,9 @@ src/
 8. Для recovery-context добавлены `AGENTS.md`, `PROJECT_CONTEXT.md`, `CODING_STYLE.md`, `TASKS.md`, `DEVELOPMENT_LOG.md`; индивидуальный стиль владельца остаётся неподтверждённым до получения примеров предыдущих проектов.
 9. Project-level `opencode.jsonc` включает автоматическую фоновую компакцию с сохранением `15000` токенов и буфером `20%`; схема `https://opencode.ai/config.json` подтверждает формат всех полей. После изменения конфигурации нужен перезапуск OpenCode.
 10. Git-репозиторий инициализирован; начальный коммит создан, push не выполнялся.
+11. Для визуального UI-этапа допущены статические данные только в `src/mocks/mockData.ts`; никаких mock API, мутаций, финансовых расчётов и CRUD-действий не добавлено.
+12. Все демонстрационные диалоги используют нейтральные поля и отключённое сохранение; уточнение составов полей вынесено в `TASKS.md`.
+13. PNG-макеты из `ADL58_V2_Designs/` не удалось прочитать встроенным image reader; OCR-инструменты отсутствуют, поэтому UI сверялся с `README.txt` и текстовыми требованиями задачи.
 
 ## 13. Статус проверок
 
@@ -175,9 +190,11 @@ src/
 
 - `npm run lint` — без ошибок и предупреждений.
 - `npm run typecheck` — без ошибок.
-- `npm run build` — успешно.
-- `npm run dev` — сервер поднялся, HTML отдан через `curl`.
-- `npm audit --audit-level=moderate` — `found 0 vulnerabilities`.
+- `npm run build` — успешно, 2686 модулей; Vite предупреждает о размере JS-чанка (~966 kB) из-за Recharts и общего bundle.
+- `npm run dev` — сервер поднялся, HTML отдан через `curl` на предыдущем этапе.
+- `npm audit --audit-level=moderate` — `found 0 vulnerabilities` на предыдущем этапе.
+- Таблица маршрутов в `src/main.tsx` проверена после прерывания ECONNRESET: все семь разделов и fallback объявлены; навигация в `SidebarNavigation` соответствует им.
+- Браузерная проверка адаптивности и консоли в текущем окружении недоступна.
 
 ## 14. Команды
 
