@@ -501,3 +501,57 @@
 
 - Создать коммит финального UI-обзора без push и сообщить SHA владельцу.
 - После получения контрактов backend перейти к RHF + Zod формам и реальным endpoint’ам через `baseApi.injectEndpoints`.
+
+---
+
+## 2026-11-19 — Публичные страницы Landing, Login и Register
+
+### Цель
+
+Добавить публичную главную в Premium Fintech стиле и статичные страницы входа/регистрации, не затрагивая backend, бизнес-логику и данные внутренних разделов.
+
+### Что сделано
+
+- Изучены обязательные документы, `git status`, ветка `master`, HEAD `bb646da`, структура `src/`, маршруты, store, `uiSlice`, `i18n` и CSS-токены.
+- Публичный сайт `https://www.adl5-8.tj/` запрошен через webfetch: получена только SPA-оболочка с meta-описанием; JS-контент не отображается без браузера.
+- Созданы `PublicLayout`, `PublicHeader`, `AuthLayout`, `LandingPage`, `LoginPage`, `RegisterPage`.
+- `PublicHeader` содержит логотип, RU/TJ/EN, переключатель Light/Dark и ссылки-кнопки на `/login` и `/register`; на узких экранах кнопки переносятся во вторую строку.
+- `LandingPage` получил точные тексты Hero, градиентную вторую строку заголовка, сетку, мягкие фиолетовые свечения с `motion-safe`, три карточки возможностей и минимальный footer. Обе CTA-кнопки ведут на `/register`.
+- `AuthLayout` реализован без Sidebar: на desktop слева градиентная колонка с логотипом, заголовком, описанием и декоративными финансовыми элементами, справа — содержимое формы.
+- Login и Register используют нейтральный identifier, пароль с show/hide toggle, подтверждение пароля в registration, отключённые кнопки отправки и перекрёстные ссылки.
+- Dashboard перенесён с `/` на `/dashboard`; остальные внутренние разделы сохранили исходные пути; в `SidebarNavigation` обновлён только путь Dashboard.
+- Добавлены переводы `landing.*` и `auth.*` для ru/tj/en без изменения языка по умолчанию.
+
+### Изменённые файлы
+
+- `src/main.tsx`, `src/components/layout/SidebarNavigation.tsx`, `src/i18n/index.ts`.
+- Новые: `src/components/layout/PublicLayout.tsx`, `src/components/layout/PublicHeader.tsx`, `src/components/layout/AuthLayout.tsx`, `src/pages/Public/LandingPage.tsx`, `src/pages/Auth/LoginPage.tsx`, `src/pages/Auth/RegisterPage.tsx`.
+- `PROJECT_CONTEXT.md`, `TASKS.md`, `DEVELOPMENT_LOG.md`.
+
+### Проблемы
+
+- Браузер, Playwright/Puppeteer и JS-рендер для `https://www.adl5-8.tj/` недоступны; визуальное сравнение с реальным сайтом не выполнялось.
+- Скриншот/reference-изображение в сообщении задачи отсутствует; доступные локальные PNG относятся к внутренним экранам прошлого этапа.
+- Vite по-прежнему предупреждает о размере JS-чанка (~1013 kB).
+- Порт 4173 был занят сторонним процессом, поэтому итоговая проверка маршрутов выполнена на `4188 --strictPort`.
+- При первой сборке маршрутов внутренние разделы оказались вложенными под `/dashboard`; это противоречило требованию сохранить исходные пути и было исправлено до повторных проверок.
+
+### Решения
+
+- Дизайн выполнен по текстовым требованиям владельца и зафиксированным CSS-токенам; невидимые разделы сайта не выдумывались.
+- Публичные страницы отделены от внутреннего `AppShell`; общий Redux `uiSlice` и i18next переиспользованы без второго store.
+- Auth-формы оставлены визуальными: никаких auth API, RTK Query endpoints, токенов, cookies, валидации и автоперехода.
+- Формат identifier не предполагался: в интерфейсе используется нейтральная подпись, точные поля будут уточнены после изучения backend.
+
+### Результаты проверок
+
+- `npm run lint` — успешно.
+- `npm run typecheck` — успешно.
+- `npm run build` — успешно, 2698 модулей, только warning о размере чанка.
+- `npm run dev -- --host 127.0.0.1 --port 4188 --strictPort` — `/`, `/login`, `/register`, `/dashboard`, `/debts`, `/contacts`, `/folders`, `/payments`, `/users`, `/archive` и `/unknown` отдают `HTTP 200`; лог Vite без ошибок.
+- Grep подтвердил отсутствие выдуманных API/авторизации и наличие `disabled` на обеих кнопках отправки.
+
+### Далее
+
+- Создать отдельный коммит `feat: add premium fintech landing and auth pages` без push.
+- После получения контрактов backend уточнить identifier, подключить RHF + Zod и реальные endpoint’ы через `baseApi.injectEndpoints`.

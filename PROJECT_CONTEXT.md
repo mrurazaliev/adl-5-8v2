@@ -4,9 +4,10 @@
 
 ## 1. Текущий статус
 
-Проект находится на этапе **визуального UI-каркаса всех разделов с уточнённым Dashboard**. Реализованы layout, навигация, восемь маршрутов и страницы Dashboard, Debts, Contacts, Folders, Payments, Users, Archive на демонстрационных данных из `src/mocks/mockData.ts`. Dashboard приведён к трём карточкам, блоку «Финансовая статистика» и «Последние платежи», а также плавающей кнопке создания долга с демо-диалогами. Из таблицы долгов удалена колонка «Статус» при сохранении поля `status` в данных и фильтрах. Проводится финальный UI-обзор перед backend: исправлено горизонтальное переполнение вкладок на узких экранах, демо-диалог подготовлен к будущим формам RHF + Zod. CRUD, бизнес-логика, реальные API-запросы, авторизация и сохранение данных **не реализованы**.
+Проект находится на этапе **визуального UI-каркаса публичной части и внутреннего Dashboard**. Реализованы публичная главная `/`, страницы входа `/login` и регистрации `/register`, а также внутренний layout с маршрутом `/dashboard` и сохранёнными маршрутами `/debts`, `/contacts`, `/folders`, `/payments`, `/users`, `/archive` на демонстрационных данных из `src/mocks/mockData.ts`.
+ Dashboard приведён к трём карточкам, блоку «Финансовая статистика» и «Последние платежи», а также плавающей кнопке создания долга с демо-диалогами. Из таблицы долгов удалена колонка «Статус» при сохранении поля `status` в данных и фильтрах. Публичные страницы используют отдельные `PublicLayout`, `PublicHeader` и `AuthLayout` без Sidebar; язык и тема работают через существующие i18next и `uiSlice`. CRUD, бизнес-логика, реальные API-запросы, авторизация, регистрация и сохранение данных **не реализованы**.
 
-Git-репозиторий инициализирован в корне проекта. Коммит на начало финального UI-обзора: `a9f19daf7eda25cc6666f9a65a64c453f12f6713` (`feat: refine dashboard and debts table UI`). Push не выполнялся.
+Git-репозиторий инициализирован в корне проекта. Состояние перед этим этапом: `bb646dad56381754755fa68c36efef8b861c285b` (`fix: finalize UI review responsiveness and dialog scaffold`). Изменения публичных страниц фиксируются отдельным коммитом `feat: add premium fintech landing and auth pages`. Push не выполнялся.
 
 ## 2. Назначение приложения
 
@@ -53,7 +54,7 @@ src/
   assets/
   components/
     ui/          # сгенерировано shadcn CLI
-    layout/      # AppShell, SidebarNavigation
+    layout/      # AppShell, SidebarNavigation, PublicLayout, PublicHeader, AuthLayout
     shared/      # PageHeader, StatCard, StatusBadge, FilterBar, DemoActionDialog, EmptyState, DebtActionFab
   features/
     ui/
@@ -66,11 +67,14 @@ src/
   mocks/
     mockData.ts            # только временные UI-данные, не backend
   pages/
+    Auth/LoginPage.tsx
+    Auth/RegisterPage.tsx
     Dashboard/DashboardPage.tsx
     Debts/DebtsPage.tsx
     Contacts/ContactsPage.tsx
     Folders/FoldersPage.tsx
     Payments/PaymentsPage.tsx
+    Public/LandingPage.tsx
     Users/UsersPage.tsx
     Archive/ArchivePage.tsx
   styles/
@@ -92,7 +96,10 @@ src/
 
 В `src/main.tsx` настроены `Provider`, `BrowserRouter` и `Routes`. Маршруты:
 
-- `/` → `DashboardPage` (index)
+- `/` → `PublicLayout` + `LandingPage` (index)
+- `/login` → `PublicLayout` + `AuthLayout` + `LoginPage`
+- `/register` → `PublicLayout` + `AuthLayout` + `RegisterPage`
+- `/dashboard` → `App` (`AppShell`) + `DashboardPage`
 - `/debts` → `DebtsPage`
 - `/contacts` → `ContactsPage`
 - `/folders` → `FoldersPage`
@@ -101,7 +108,8 @@ src/
 - `/archive` → `ArchivePage`
 - `*` → `Navigate to="/"`
 
-`src/App.tsx` — тонкая обёртка над `AppShell`. `AppShell` содержит desktop sidebar, мобильный `Sheet`, header с кнопкой меню, переключателем темы и выбором языка; страницы рендерятся через `Outlet`. Активная навигация определяется `NavLink` в `SidebarNavigation`.
+`PublicLayout` отображает `PublicHeader` без Sidebar и используется для публичных и auth-страниц. `AuthLayout` добавляет двухколоночную композицию: слева градиентный блок с описанием и декоративными элементами, справа — форма через `Outlet`. `src/App.tsx` остался тонкой обёрткой над `AppShell`; внутренние пути разделов сохранены, в `SidebarNavigation` изменён только путь Dashboard на `/dashboard`.
+ Язык и тема на публичных страницах переключаются через те же `i18next` и `uiSlice`.
 
 ## 7. Redux Architecture
 
@@ -142,8 +150,9 @@ src/
 
 - Языки: `ru`, `tj`, `en`.
 - Язык по умолчанию и fallback: `ru`.
-- Ключи: `appTitle`, `subtitle`, `toggleTheme`, `language`, `navigation`, `demoMode`, группы `nav`, `common`, `pages`.
-- Переводы добавлены для всех заголовков страниц, навигации, общих действий и новых подписей Dashboard (`owedToMe`, `iOwe`, `createDebt`, FAB-подсказки и описания демо-диалогов); детали DemoActionDialog пока заданы текстом в компонентах.
+- Ключи: `appTitle`, `subtitle`, `toggleTheme`, `language`, `navigation`, `demoMode`, группы `nav`, `common`, `pages`, `landing`, `auth`.
+- Переводы добавлены для всех заголовков страниц, навигации, общих действий, подписей Dashboard, публичной главной и статичных auth-страниц. Тексты Hero заданы через `landing.hero`, возможности — через `landing.features`, формы — через `auth.*`.
+- Детали DemoActionDialog пока заданы текстом в компонентах.
 - Переключатель языка в `AppShell` вызывает `i18n.changeLanguage`.
 
 ## 10. Design System
@@ -188,6 +197,10 @@ src/
 16. Статус долга скрыт только из таблицы Debts: поле `status`, фильтры и вкладки сохранены без изменений.
 17. Для вкладок Debts, Payments и Archive добавлены контейнеры с горизонтальной прокруткой: labels не вызывают переполнение страницы на 375px.
 18. `DemoActionDialog` принимает опциональные `children`, чтобы будущие RHF + Zod поля можно было подставить без переписывания диалога; демо-поля, валидация и отправка остаются неизменными.
+19. Публичный сайт `https://www.adl5-8.tj/` проверен через webfetch: доступен только SPA-оболочка с meta-описанием «Offline-first debt management platform…»; браузер и JS-рендер в окружении недоступны, поэтому содержание сверялось с текстовой задачей, а не с визуальным screenshot.
+20. `/` отведён под Landing Page, Dashboard перенесён на `/dashboard`; в `SidebarNavigation` обновлены путь и active state Dashboard. Остальные внутренние разделы сохранили исходные пути `/debts`, `/contacts`, `/folders`, `/payments`, `/users`, `/archive`.
+21. Публичные страницы выделены в `PublicLayout`/`PublicHeader`/`AuthLayout` и не используют Sidebar; переключатели языка и темы переиспользуют существующие механизмы.
+22. Login и Register оставлены статичными: нейтральный `identifier`, пароль с toggles, отключённые кнопки отправки, без RHF/Zod, API, токенов и автоперехода. Точный формат identifier sẽ уточняться после изучения backend.
 
 ## 13. Статус проверок
 
@@ -195,11 +208,11 @@ src/
 
 - `npm run lint` — без ошибок и предупреждений.
 - `npm run typecheck` — без ошибок.
-- `npm run build` — успешно, 2692 модуля; Vite предупреждает о размере JS-чанка (~990 kB) из-за Recharts и общего bundle.
-- `npm run dev` — сервер поднялся; маршруты `/`, `/debts`, `/contacts`, `/folders`, `/payments`, `/users`, `/archive` и fallback отдают `HTTP 200`.
+- `npm run build` — успешно, 2698 модулей; Vite предупреждает о размере JS-чанка (~1013 kB) из-за Recharts и общего bundle.
+- `npm run dev -- --host 127.0.0.1 --port 4188 --strictPort` — сервер поднялся; маршруты `/`, `/login`, `/register`, `/dashboard`, `/debts`, `/contacts`, `/folders`, `/payments`, `/users`, `/archive` и `/unknown` отдают `HTTP 200`.
 - `npm audit --audit-level=moderate` — `found 0 vulnerabilities` на предыдущем этапе.
-- Таблица маршрутов в `src/main.tsx` проверена после прерывания ECONNRESET: все семь разделов и fallback объявлены; навигация в `SidebarNavigation` соответствует им.
-- Браузерная проверка адаптивности и консоли в текущем окружении недоступна.
+- Grep подтвердил отсутствие выдуманных auth API/запросов и отключённые кнопки входа и регистрации.
+- Браузерная проверка адаптивности, JS-рендера публичного сайта и консоли в текущем окружении недоступна; webfetch вернул только статическую SPA-оболочку.
 
 ## 14. Команды
 

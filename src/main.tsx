@@ -8,12 +8,17 @@ import App from '@/App'
 import '@/i18n'
 import '@/styles/index.css'
 
+import { AuthLayout } from '@/components/layout/AuthLayout'
+import { PublicLayout } from '@/components/layout/PublicLayout'
 import ArchivePage from '@/pages/Archive/ArchivePage'
+import LoginPage from '@/pages/Auth/LoginPage'
+import RegisterPage from '@/pages/Auth/RegisterPage'
 import ContactsPage from '@/pages/Contacts/ContactsPage'
 import DashboardPage from '@/pages/Dashboard/DashboardPage'
 import DebtsPage from '@/pages/Debts/DebtsPage'
 import FoldersPage from '@/pages/Folders/FoldersPage'
 import PaymentsPage from '@/pages/Payments/PaymentsPage'
+import LandingPage from '@/pages/Public/LandingPage'
 import UsersPage from '@/pages/Users/UsersPage'
 
 createRoot(document.getElementById('root')!).render(
@@ -21,8 +26,17 @@ createRoot(document.getElementById('root')!).render(
     <Provider store={store}>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<App />}>
-            <Route index element={<DashboardPage />} />
+          <Route element={<PublicLayout />}>
+            <Route index element={<LandingPage />} />
+            <Route path="login" element={<AuthLayout />}>
+              <Route index element={<LoginPage />} />
+            </Route>
+            <Route path="register" element={<AuthLayout />}>
+              <Route index element={<RegisterPage />} />
+            </Route>
+          </Route>
+          <Route element={<App />}>
+            <Route path="dashboard" element={<DashboardPage />} />
             <Route path="debts" element={<DebtsPage />} />
             <Route path="contacts" element={<ContactsPage />} />
             <Route path="folders" element={<FoldersPage />} />

@@ -10,6 +10,68 @@ const resources = {
       language: 'Язык интерфейса',
       navigation: 'Навигация',
       demoMode: 'Демо-интерфейс без подключения к backend',
+      landing: {
+        hero: {
+          eyebrow: 'УМНОЕ УПРАВЛЕНИЕ ДОЛГАМИ',
+          titleLine1: 'Учитывай каждый долг.',
+          titleLine2: 'Управляй финансами.',
+          description:
+            'Удобная платформа для управления долгами, контактами и финансовыми записями. Контролируйте свои обязательства в одном месте.',
+          primaryCta: 'Начать бесплатно',
+          secondaryCta: 'Создать аккаунт',
+        },
+        features: {
+          title: 'Всё важное в одном месте',
+          subtitle:
+            'Работайте с долгами, контактами и платежами в едином пространстве.',
+          debts: {
+            title: 'Управление долгами',
+            description:
+              'Собирайте долговые записи и следите за обязательствами в удобном списке.',
+          },
+          contacts: {
+            title: 'Контакты и папки',
+            description: 'Организуйте контакты и структурируйте данные по папкам.',
+          },
+          payments: {
+            title: 'История платежей',
+            description: 'Просматривайте платежные записи и анализируйте динамику.',
+          },
+        },
+      },
+      auth: {
+        login: 'Войти',
+        register: 'Регистрация',
+        registerAction: 'Зарегистрироваться',
+        loginEyebrow: 'С возвращением',
+        loginTitle: 'С возвращением!',
+        loginSubtitle:
+          'Войдите в свой аккаунт, чтобы продолжить работу с долгами и платежами.',
+        registerEyebrow: 'Новый аккаунт',
+        registerTitle: 'Создать аккаунт',
+        registerSubtitle:
+          'Подготовьте пространство для управления долгами, контактами и платежами.',
+        identifier: 'Идентификатор',
+        identifierPlaceholder: 'Введите идентификатор',
+        password: 'Пароль',
+        passwordPlaceholder: 'Введите пароль',
+        confirmPassword: 'Подтверждение пароля',
+        confirmPasswordPlaceholder: 'Повторите пароль',
+        showPassword: 'Показать пароль',
+        hidePassword: 'Скрыть пароль',
+        noAccount: 'Нет аккаунта?',
+        hasAccount: 'Уже есть аккаунт?',
+        registerLink: 'Создать аккаунт',
+        loginLink: 'Войти',
+        demoSubmitHint:
+          'Кнопка неактивна: вход и регистрация появятся после подключения backend.',
+        sideTitle: 'Финансы под контролем',
+        sideDescription:
+          'Управляйте долгами, контактами и платежами в одном интерфейсе.',
+        sideDebts: 'Долги',
+        sideContacts: 'Контакты',
+        sidePayments: 'Платежи',
+      },
       nav: {
         dashboard: 'Дашборд',
         debts: 'Долги',
@@ -85,6 +147,67 @@ const resources = {
       language: 'Забони интерфейс',
       navigation: 'Навбарӣ',
       demoMode: 'Интерфейси намоишӣ бе пайвастшавӣ ба backend',
+      landing: {
+        hero: {
+          eyebrow: 'ҚАРЗҲОРО ОҚИЛОНА ИДОРА КУНЕД',
+          titleLine1: 'Ҳар қарзро ба ҳисоб гиред.',
+          titleLine2: 'Молияи худро идора кунед.',
+          description:
+            'Платформаи қулай барои идоракунии қарзҳо, тамосҳо ва сабтҳои молиявӣ. Уҳдадориҳои худро дар як ҷо назорат кунед.',
+          primaryCta: 'Ройгон оғоз кунед',
+          secondaryCta: 'Эҷоди ҳисоб',
+        },
+        features: {
+          title: 'Ҳама чизи муҳим дар як ҷо',
+          subtitle: 'Қарзҳо, тамосҳо ва пардохтҳоро дар як фазо идора кунед.',
+          debts: {
+            title: 'Идоракунии қарзҳо',
+            description:
+              'Сабтҳои қарзро ҷамъ оварда, уҳдадориҳоро дар рӯйхати қулай пайгирӣ кунед.',
+          },
+          contacts: {
+            title: 'Тамосҳо ва папкаҳо',
+            description: 'Тамосҳоро ташкил кунед ва маълумотро ба папкаҳо ҷудо кунед.',
+          },
+          payments: {
+            title: 'Таърихи пардохтҳо',
+            description: 'Сабтҳои пардохтро дида, динамикаро таҳлил кунед.',
+          },
+        },
+      },
+      auth: {
+        login: 'Ворид шудан',
+        register: 'Бақайд гирифтан',
+        registerAction: 'Эҷоди ҳисоб',
+        loginEyebrow: 'Хуш омадед',
+        loginTitle: 'Хуш омадед!',
+        loginSubtitle:
+          'Барои идомаи кор бо қарзҳо ва пардохтҳо ба ҳисоби худ ворид шавед.',
+        registerEyebrow: 'Ҳисоби нав',
+        registerTitle: 'Эҷоди ҳисоб',
+        registerSubtitle:
+          'Фазоеро барои идоракунии қарзҳо, тамосҳо ва пардохтҳо омода кунед.',
+        identifier: 'Муайянкунанда',
+        identifierPlaceholder: 'Муайянкунандаро ворид кунед',
+        password: 'Гувороҳа',
+        passwordPlaceholder: 'Гувороҳаро ворид кунед',
+        confirmPassword: 'Такрори гувороҳа',
+        confirmPasswordPlaceholder: 'Гувороҳаро такрор кунед',
+        showPassword: 'Намоиш додани гувороҳа',
+        hidePassword: 'Пинҳон кардани гувороҳа',
+        noAccount: 'Ҳисоб надоред?',
+        hasAccount: 'Аллакай ҳисоб доред?',
+        registerLink: 'Эҷоди ҳисоб',
+        loginLink: 'Ворид шудан',
+        demoSubmitHint:
+          'Тугма ғайрифаъол аст: воридшавӣ ва бақайдгирӣ пас аз пайвастшавӣ ба backend дастрас мешаванд.',
+        sideTitle: 'Молия зери назорат',
+        sideDescription:
+          'Қарзҳо, тамосҳо ва пардохтҳоро дар як интерфейс идора кунед.',
+        sideDebts: 'Қарзҳо',
+        sideContacts: 'Тамосҳо',
+        sidePayments: 'Пардохтҳо',
+      },
       nav: {
         dashboard: 'Саҳифаи асосӣ',
         debts: 'Қарзҳо',
@@ -160,6 +283,64 @@ const resources = {
       language: 'Interface language',
       navigation: 'Navigation',
       demoMode: 'Demo interface with no backend connection',
+      landing: {
+        hero: {
+          eyebrow: 'SMART DEBT MANAGEMENT',
+          titleLine1: 'Track every debt.',
+          titleLine2: 'Manage your finances.',
+          description:
+            'A convenient platform for managing debts, contacts, and financial records. Keep all your obligations under control in one place.',
+          primaryCta: 'Get started free',
+          secondaryCta: 'Create an account',
+        },
+        features: {
+          title: 'Everything important in one place',
+          subtitle: 'Work with debts, contacts, and payments in a single space.',
+          debts: {
+            title: 'Debt management',
+            description: 'Collect debt records and track obligations in a clear list.',
+          },
+          contacts: {
+            title: 'Contacts and folders',
+            description: 'Organize contacts and structure your data with folders.',
+          },
+          payments: {
+            title: 'Payment history',
+            description: 'Review payment records and follow trends over time.',
+          },
+        },
+      },
+      auth: {
+        login: 'Sign in',
+        register: 'Register',
+        registerAction: 'Create account',
+        loginEyebrow: 'Welcome back',
+        loginTitle: 'Welcome back!',
+        loginSubtitle: 'Sign in to continue working with your debts and payments.',
+        registerEyebrow: 'New account',
+        registerTitle: 'Create an account',
+        registerSubtitle: 'Set up a space for managing debts, contacts, and payments.',
+        identifier: 'Identifier',
+        identifierPlaceholder: 'Enter your identifier',
+        password: 'Password',
+        passwordPlaceholder: 'Enter your password',
+        confirmPassword: 'Confirm password',
+        confirmPasswordPlaceholder: 'Repeat your password',
+        showPassword: 'Show password',
+        hidePassword: 'Hide password',
+        noAccount: 'No account?',
+        hasAccount: 'Already have an account?',
+        registerLink: 'Create an account',
+        loginLink: 'Sign in',
+        demoSubmitHint:
+          'This button is disabled: sign-in and registration will appear after backend integration.',
+        sideTitle: 'Finances under control',
+        sideDescription:
+          'Manage debts, contacts, and payments in a single interface.',
+        sideDebts: 'Debts',
+        sideContacts: 'Contacts',
+        sidePayments: 'Payments',
+      },
       nav: {
         dashboard: 'Dashboard',
         debts: 'Debts',

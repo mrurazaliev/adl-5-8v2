@@ -19,7 +19,7 @@ interface NavigationItem {
 }
 
 const items: NavigationItem[] = [
-  { to: '/', labelKey: 'nav.dashboard', icon: LayoutDashboard },
+  { to: '/dashboard', labelKey: 'nav.dashboard', icon: LayoutDashboard },
   { to: '/debts', labelKey: 'nav.debts', icon: CreditCard },
   { to: '/contacts', labelKey: 'nav.contacts', icon: Users },
   { to: '/folders', labelKey: 'nav.folders', icon: Folder },
@@ -45,7 +45,7 @@ export function SidebarNavigation({
         <NavLink
           key={item.to}
           to={item.to}
-          end={item.to === '/'}
+          end={item.to === '/dashboard'}
           onClick={onNavigate}
           className={({ isActive }) =>
             cn(
