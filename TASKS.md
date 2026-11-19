@@ -21,10 +21,15 @@
 - [x] Настройка Premium Fintech CSS-переменных, light/dark темы, radius/spacing.
 - [x] Создание `.env.example`, `.gitignore` и подготовка каталогов под будущие разделы.
 - [x] Проверки: `npm run lint`, `npm run typecheck`, `npm run build`, запуск `npm run dev`, `npm audit --audit-level=moderate`.
+- [x] Создание файлов постоянного контекста: `AGENTS.md`, `PROJECT_CONTEXT.md`, `TASKS.md`, `DEVELOPMENT_LOG.md`.
+- [x] Создание `CODING_STYLE.md` как черновика с зафиксированными требованиями владельца и границами бизнес-логики.
+- [x] Инициализация Git-репозитория и создание начального коммита `d9a690a694345fbdf41169cdcb76a594e26ef694`.
+- [x] Создание project-level `opencode.jsonc` с проверенной по официальной схеме автоматической компакцией.
+- [x] Обновление `AGENTS.md`, `PROJECT_CONTEXT.md`, `TASKS.md` и `DEVELOPMENT_LOG.md` под текущее состояние проекта.
 
 ## In Progress
 
-- [ ] Создание четырёх файлов постоянного контекста: `AGENTS.md`, `PROJECT_CONTEXT.md`, `TASKS.md`, `DEVELOPMENT_LOG.md`.
+Нет активных задач.
 
 ## Pending
 

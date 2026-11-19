@@ -6,7 +6,7 @@
 
 Проект находится на этапе **завершённой инициализации**. Реализована только стартовая страница. CRUD, бизнес-логика, страницы разделов, реальные API-запросы и авторизация **не реализованы**.
 
-Репозиторий Git в каталоге проекта отсутствует (`git status` возвращает `not a git repository`). Коммиты и push не выполнялись.
+Git-репозиторий инициализирован в корне проекта. Начальный коммит: `d9a690a694345fbdf41169cdcb76a594e26ef694` (`chore: initialize ADL58 V2 frontend project`). Push не выполнялся.
 
 ## 2. Назначение приложения
 
@@ -76,7 +76,9 @@ src/
   vite-env.d.ts
 ```
 
-Конфигурации в корне: `package.json`, `vite.config.ts`, `tsconfig.json`, `tsconfig.app.json`, `tsconfig.node.json`, `eslint.config.js`, `components.json`, `.env.example`, `.gitignore`, `index.html`.
+Конфигурации в корне: `package.json`, `vite.config.ts`, `tsconfig.json`, `tsconfig.app.json`, `tsconfig.node.json`, `eslint.config.js`, `components.json`, `opencode.jsonc`, `.env.example`, `.gitignore`, `index.html`.
+
+Документы восстановления контекста в корне: `AGENTS.md`, `PROJECT_CONTEXT.md`, `CODING_STYLE.md`, `TASKS.md`, `DEVELOPMENT_LOG.md`.
 
 `README.md` остался от шаблона Vite и упоминает Oxlint; фактически используется ESLint. Считать авторитетными `package.json`, `eslint.config.js` и настоящие документы.
 
@@ -163,6 +165,9 @@ src/
 5. Сгенерированные компоненты импортируют `cn` из `@/lib/utils`, а не из сервисного пакета `cn`.
 6. Выполнено официальное `shadcn eject`: CSS-утилиты инлайновы, runtime-зависимость `shadcn` удалена, `npm audit` показывает 0 уязвимостей. Будущие обновления `shadcn/tailwind.css` не применяются автоматически; компоненты по-прежнему можно добавлять CLI.
 7. ESLint заменяет штатный Oxlint шаблона Vite; `.oxlintrc.json` удалён.
+8. Для recovery-context добавлены `AGENTS.md`, `PROJECT_CONTEXT.md`, `CODING_STYLE.md`, `TASKS.md`, `DEVELOPMENT_LOG.md`; индивидуальный стиль владельца остаётся неподтверждённым до получения примеров предыдущих проектов.
+9. Project-level `opencode.jsonc` включает автоматическую фоновую компакцию с сохранением `15000` токенов и буфером `20%`; схема `https://opencode.ai/config.json` подтверждает формат всех полей. После изменения конфигурации нужен перезапуск OpenCode.
+10. Git-репозиторий инициализирован; начальный коммит создан, push не выполнялся.
 
 ## 13. Статус проверок
 
@@ -185,4 +190,4 @@ npm run typecheck
 npm run build
 ```
 
-Перед началом любой работы также прочитай `AGENTS.md`, `TASKS.md` и последние записи `DEVELOPMENT_LOG.md`.
+Перед началом любой работы также прочитай `AGENTS.md`, `CODING_STYLE.md`, `TASKS.md`, последние записи `DEVELOPMENT_LOG.md`, а также проверь `git status --short` и `git log --oneline -10`.
