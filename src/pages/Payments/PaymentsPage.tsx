@@ -85,12 +85,14 @@ export default function PaymentsPage() {
           />
 
           <Tabs defaultValue="all">
-            <TabsList className="mb-4">
-              <TabsTrigger value="all">{t('common.all')}</TabsTrigger>
-              <TabsTrigger value="completed">Завершённые</TabsTrigger>
-              <TabsTrigger value="pending">Ожидающие</TabsTrigger>
-              <TabsTrigger value="overdue">Просроченные</TabsTrigger>
-            </TabsList>
+            <div className="no-scrollbar mb-4 max-w-full overflow-x-auto">
+              <TabsList>
+                <TabsTrigger value="all">{t('common.all')}</TabsTrigger>
+                <TabsTrigger value="completed">Завершённые</TabsTrigger>
+                <TabsTrigger value="pending">Ожидающие</TabsTrigger>
+                <TabsTrigger value="overdue">Просроченные</TabsTrigger>
+              </TabsList>
+            </div>
 
             <TabsContent value="all" className="overflow-x-auto">
               <Table>

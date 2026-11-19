@@ -86,12 +86,14 @@ export default function DebtsPage() {
           />
 
           <Tabs defaultValue="all">
-            <TabsList className="mb-4">
-              <TabsTrigger value="all">{t('common.all')}</TabsTrigger>
-              <TabsTrigger value="active">Активные</TabsTrigger>
-              <TabsTrigger value="overdue">Просроченные</TabsTrigger>
-              <TabsTrigger value="paid">Оплаченные</TabsTrigger>
-            </TabsList>
+            <div className="no-scrollbar mb-4 max-w-full overflow-x-auto">
+              <TabsList>
+                <TabsTrigger value="all">{t('common.all')}</TabsTrigger>
+                <TabsTrigger value="active">Активные</TabsTrigger>
+                <TabsTrigger value="overdue">Просроченные</TabsTrigger>
+                <TabsTrigger value="paid">Оплаченные</TabsTrigger>
+              </TabsList>
+            </div>
 
             <TabsContent value="all" className="overflow-x-auto">
               <Table>

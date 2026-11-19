@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -22,6 +23,7 @@ interface DemoActionDialogProps {
   description: string
   fields?: string[]
   saveLabel?: string
+  children?: ReactNode
 }
 
 const defaultFields = ['Параметр 01', 'Параметр 02', 'Параметр 03']
@@ -33,6 +35,7 @@ export function DemoActionDialog({
   description,
   fields = defaultFields,
   saveLabel = 'Сохранение недоступно',
+  children,
 }: DemoActionDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -43,20 +46,24 @@ export function DemoActionDialog({
         </DialogHeader>
 
         <FieldGroup>
-          {fields.map((label, index) => (
-            <Field key={label}>
-              <FieldLabel htmlFor={`demo-field-${index}`}>{label}</FieldLabel>
-              <Input
-                id={`demo-field-${index}`}
-                placeholder="Не заполняется в демо"
-                disabled
-              />
-            </Field>
-          ))}
-          <FieldDescription>
-            Состав полей и правила сохранения будут определены после подключения
-            backend.
-          </FieldDescription>
+          {children ?? (
+            <>
+              {fields.map((label, index) => (
+                <Field key={label}>
+                  <FieldLabel htmlFor={`demo-field-${index}`}>{label}</FieldLabel>
+                  <Input
+                    id={`demo-field-${index}`}
+                    placeholder="Не заполняется в демо"
+                    disabled
+                  />
+                </Field>
+              ))}
+              <FieldDescription>
+                Состав полей и правила сохранения будут определены после
+                подключения backend.
+              </FieldDescription>
+            </>
+          )}
         </FieldGroup>
 
         <DialogFooter>

@@ -63,10 +63,12 @@ export default function ArchivePage() {
           />
 
           <Tabs defaultValue="all">
-            <TabsList className="mb-4">
-              <TabsTrigger value="all">{t('common.all')}</TabsTrigger>
-              <TabsTrigger value="empty">Пустой список</TabsTrigger>
-            </TabsList>
+            <div className="no-scrollbar mb-4 max-w-full overflow-x-auto">
+              <TabsList>
+                <TabsTrigger value="all">{t('common.all')}</TabsTrigger>
+                <TabsTrigger value="empty">Пустой список</TabsTrigger>
+              </TabsList>
+            </div>
 
             <TabsContent value="all" className="overflow-x-auto">
               <Table>
