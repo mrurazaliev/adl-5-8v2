@@ -4,7 +4,7 @@
 
 ## 1. Текущий статус
 
-Проект находится на этапе **визуального UI-каркаса всех разделов**. Реализованы layout, навигация, восемь маршрутов и страницы Dashboard, Debts, Contacts, Folders, Payments, Users, Archive на демонстрационных данных из `src/mocks/mockData.ts`. CRUD, бизнес-логика, реальные API-запросы, авторизация и сохранение данных **не реализованы**.
+Проект находится на этапе **визуального UI-каркаса всех разделов с уточнённым Dashboard**. Реализованы layout, навигация, восемь маршрутов и страницы Dashboard, Debts, Contacts, Folders, Payments, Users, Archive на демонстрационных данных из `src/mocks/mockData.ts`. Dashboard приведён к трём карточкам, блоку «Финансовая статистика» и «Последние платежи», а также плавающей кнопке создания долга с демо-диалогами. Из таблицы долгов удалена колонка «Статус» при сохранении поля `status` в данных и фильтрах. CRUD, бизнес-логика, реальные API-запросы, авторизация и сохранение данных **не реализованы**.
 
 Git-репозиторий инициализирован в корне проекта. Начальный коммит: `d9a690a694345fbdf41169cdcb76a594e26ef694` (`chore: initialize ADL58 V2 frontend project`). Push не выполнялся.
 
@@ -54,7 +54,8 @@ src/
   components/
     ui/          # сгенерировано shadcn CLI
     layout/      # AppShell, SidebarNavigation
-    shared/      # PageHeader, StatCard, StatusBadge, FilterBar, DemoActionDialog, EmptyState
+     shared/      # PageHeader, StatCard, StatusBadge, FilterBar, DemoActionDialog, EmptyState, DebtActionFab
+
   features/
     ui/
       uiSlice.ts
@@ -143,7 +144,7 @@ src/
 - Языки: `ru`, `tj`, `en`.
 - Язык по умолчанию и fallback: `ru`.
 - Ключи: `appTitle`, `subtitle`, `toggleTheme`, `language`, `navigation`, `demoMode`, группы `nav`, `common`, `pages`.
-- Переводы добавлены для всех заголовков страниц, навигации и общих действий; детали DemoActionDialog пока заданы текстом в компонентах.
+- Переводы добавлены для всех заголовков страниц, навигации, общих действий и новых подписей Dashboard (`owedToMe`, `iOwe`, `createDebt`, FAB-подсказки и описания демо-диалогов); детали DemoActionDialog пока заданы текстом в компонентах.
 - Переключатель языка в `AppShell` вызывает `i18n.changeLanguage`.
 
 ## 10. Design System
@@ -183,6 +184,9 @@ src/
 11. Для визуального UI-этапа допущены статические данные только в `src/mocks/mockData.ts`; никаких mock API, мутаций, финансовых расчётов и CRUD-действий не добавлено.
 12. Все демонстрационные диалоги используют нейтральные поля и отключённое сохранение; уточнение составов полей вынесено в `TASKS.md`.
 13. PNG-макеты из `ADL58_V2_Designs/` не удалось прочитать встроенным image reader; OCR-инструменты отсутствуют, поэтому UI сверялся с `README.txt` и текстовыми требованиями задачи.
+14. При доработке Dashboard `01_Dashboard_FINAL.png` был открыт image reader, но текущая модель не отображает содержимое изображений; изменения выполнялись строго по текстовым требованиям владельца и `README.txt`.
+15. Donut chart и Quick Actions удалены только из Dashboard; Recharts для AreaChart сохранён, новые действия сведены к одному FAB с двумя демо-модалками.
+16. Статус долга скрыт только из таблицы Debts: поле `status`, фильтры и вкладки сохранены без изменений.
 
 ## 13. Статус проверок
 
@@ -190,8 +194,8 @@ src/
 
 - `npm run lint` — без ошибок и предупреждений.
 - `npm run typecheck` — без ошибок.
-- `npm run build` — успешно, 2686 модулей; Vite предупреждает о размере JS-чанка (~966 kB) из-за Recharts и общего bundle.
-- `npm run dev` — сервер поднялся, HTML отдан через `curl` на предыдущем этапе.
+- `npm run build` — успешно, 2692 модуля; Vite предупреждает о размере JS-чанка (~990 kB) из-за Recharts и общего bundle.
+- `npm run dev` — сервер поднялся, главная страница отдала `HTTP 200`.
 - `npm audit --audit-level=moderate` — `found 0 vulnerabilities` на предыдущем этапе.
 - Таблица маршрутов в `src/main.tsx` проверена после прерывания ECONNRESET: все семь разделов и fallback объявлены; навигация в `SidebarNavigation` соответствует им.
 - Браузерная проверка адаптивности и консоли в текущем окружении недоступна.

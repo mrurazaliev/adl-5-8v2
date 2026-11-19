@@ -5,7 +5,6 @@ import { DemoActionDialog } from '@/components/shared/DemoActionDialog'
 import { FilterBar } from '@/components/shared/FilterBar'
 import { PageHeader } from '@/components/shared/PageHeader'
 import { StatCard } from '@/components/shared/StatCard'
-import { StatusBadge } from '@/components/shared/StatusBadge'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -98,13 +97,12 @@ export default function DebtsPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>ID</TableHead>
-                    <TableHead>Должник</TableHead>
-                    <TableHead>Папка</TableHead>
-                    <TableHead>Сумма</TableHead>
-                    <TableHead>Срок</TableHead>
-                    <TableHead>{t('common.status')}</TableHead>
-                    <TableHead className="text-right">Действия</TableHead>
+                    <TableHead className="w-[12%]">ID</TableHead>
+                    <TableHead className="w-[24%]">Должник</TableHead>
+                    <TableHead className="w-[16%]">Папка</TableHead>
+                    <TableHead className="w-[16%]">Сумма</TableHead>
+                    <TableHead className="w-[14%]">Срок</TableHead>
+                    <TableHead className="w-[18%] text-right">Действия</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -117,9 +115,6 @@ export default function DebtsPage() {
                       <TableCell className="whitespace-nowrap">{row.folder}</TableCell>
                       <TableCell className="whitespace-nowrap">{row.amount}</TableCell>
                       <TableCell className="whitespace-nowrap">{row.dueDate}</TableCell>
-                      <TableCell>
-                        <StatusBadge status={row.status} />
-                      </TableCell>
                       <TableCell>
                         <div className="flex justify-end gap-1">
                           <Button

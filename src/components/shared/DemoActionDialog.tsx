@@ -21,6 +21,7 @@ interface DemoActionDialogProps {
   title: string
   description: string
   fields?: string[]
+  saveLabel?: string
 }
 
 const defaultFields = ['Параметр 01', 'Параметр 02', 'Параметр 03']
@@ -31,6 +32,7 @@ export function DemoActionDialog({
   title,
   description,
   fields = defaultFields,
+  saveLabel = 'Сохранение недоступно',
 }: DemoActionDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -66,7 +68,7 @@ export function DemoActionDialog({
             Отмена
           </Button>
           <Button type="button" disabled>
-            Сохранение недоступно
+            {saveLabel}
           </Button>
         </DialogFooter>
       </DialogContent>

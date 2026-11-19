@@ -1,24 +1,17 @@
-import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Area,
   AreaChart,
   CartesianGrid,
-  Cell,
-  Legend,
-  Pie,
-  PieChart,
   ResponsiveContainer,
   Tooltip as ChartTooltip,
   XAxis,
   YAxis,
 } from 'recharts'
-import { ArrowUpRight, FolderPlus, Plus, ReceiptText, UserPlus } from 'lucide-react'
+import { DebtActionFab } from '@/components/shared/DebtActionFab'
 import { PageHeader } from '@/components/shared/PageHeader'
-import { DemoActionDialog } from '@/components/shared/DemoActionDialog'
 import { StatCard } from '@/components/shared/StatCard'
 import { StatusBadge } from '@/components/shared/StatusBadge'
-import { Button } from '@/components/ui/button'
 import {
   Card,
   CardContent,
@@ -27,33 +20,16 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
-import {
   dashboardStats,
-  paymentDistribution,
   paymentTrend,
   recentTransactions,
 } from '@/mocks/mockData'
 
 export default function DashboardPage() {
   const { t } = useTranslation()
-  const [quickAction, setQuickAction] = useState<string | null>(null)
-
-  const actions = [
-    { label: 'Новый долг', icon: Plus },
-    { label: 'Новый контакт', icon: UserPlus },
-    { label: 'Новая папка', icon: FolderPlus },
-    { label: 'Новый платёж', icon: ReceiptText },
-  ]
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-24">
       <PageHeader
         title={t('pages.dashboard.title')}
         description={t('pages.dashboard.subtitle')}
@@ -63,7 +39,7 @@ export default function DashboardPage() {
         <h2 id="dashboard-stats" className="text-sm font-semibold">
           {t('pages.dashboard.stats')}
         </h2>
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {dashboardStats.map((item) => (
             <StatCard key={item.id} item={item} />
           ))}
@@ -76,7 +52,7 @@ export default function DashboardPage() {
             <CardTitle>{t('pages.dashboard.trend')}</CardTitle>
             <CardDescription>Демонстрационные значения по месяцам</CardDescription>
           </CardHeader>
-          <CardContent className="h-[300px]">
+          <CardContent className="h-[320px]">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart
                 data={paymentTrend}
@@ -109,101 +85,32 @@ export default function DashboardPage() {
 
         <Card className="border-border/70 shadow-sm">
           <CardHeader>
-            <CardTitle>{t('pages.dashboard.structure')}</CardTitle>
-            <CardDescription>Демонстрационное распределение</CardDescription>
-          </CardHeader>
-          <CardContent className="h-[300px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={paymentDistribution}
-                  dataKey="value"
-                  nameKey="name"
-                  innerRadius={55}
-                  outerRadius={90}
-                  paddingAngle={3}
-                >
-                  {paymentDistribution.map((entry) => (
-                    <Cell key={entry.name} fill={entry.color} />
-                  ))}
-                </Pie>
-                <ChartTooltip />
-                <Legend />
-              </PieChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-      </section>
-
-      <section className="grid gap-4 xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
-        <Card className="border-border/70 shadow-sm">
-          <CardHeader>
             <CardTitle>{t('pages.dashboard.recent')}</CardTitle>
             <CardDescription>Только визуальные демонстрационные строки</CardDescription>
           </CardHeader>
-          <CardContent className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>ID</TableHead>
-                  <TableHead>Контрагент</TableHead>
-                  <TableHead>Категория</TableHead>
-                  <TableHead>Дата</TableHead>
-                  <TableHead>Сумма</TableHead>
-                  <TableHead>{t('common.status')}</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {recentTransactions.map((row) => (
-                  <TableRow key={row.id}>
-                    <TableCell className="font-mono text-xs">{row.id}</TableCell>
-                    <TableCell className="font-medium whitespace-nowrap">
-                      {row.counterparty}
-                    </TableCell>
-                    <TableCell className="whitespace-nowrap">{row.category}</TableCell>
-                    <TableCell className="whitespace-nowrap">{row.date}</TableCell>
-                    <TableCell className="whitespace-nowrap">{row.amount}</TableCell>
-                    <TableCell>
-                      <StatusBadge status={row.status} />
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
-
-        <Card className="border-border/70 shadow-sm">
-          <CardHeader>
-            <CardTitle>{t('pages.dashboard.quick')}</CardTitle>
-            <CardDescription>Действия откроют демонстрационное окно</CardDescription>
-          </CardHeader>
-          <CardContent className="grid gap-2">
-            {actions.map((action) => (
-              <Button
-                key={action.label}
-                type="button"
-                variant="outline"
-                className="justify-start"
-                onClick={() => setQuickAction(action.label)}
+          <CardContent className="space-y-3">
+            {recentTransactions.map((row) => (
+              <div
+                key={row.id}
+                className="flex items-center justify-between gap-3 rounded-xl border border-border/70 bg-background/40 p-3"
               >
-                <action.icon />
-                {action.label}
-                <ArrowUpRight className="ml-auto" />
-              </Button>
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-medium">{row.counterparty}</p>
+                  <p className="truncate text-xs text-muted-foreground">
+                    {row.date} · {row.category}
+                  </p>
+                </div>
+                <div className="shrink-0 text-right">
+                  <p className="text-sm font-semibold">{row.amount}</p>
+                  <StatusBadge status={row.status} />
+                </div>
+              </div>
             ))}
           </CardContent>
         </Card>
       </section>
 
-      <DemoActionDialog
-        open={quickAction !== null}
-        onOpenChange={(open) => {
-          if (!open) setQuickAction(null)
-        }}
-        title={quickAction ?? ''}
-        description="Это демонстрационное окно. Сохранение данных появится после подключения backend."
-      />
+      <DebtActionFab />
     </div>
   )
 }

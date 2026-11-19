@@ -40,6 +40,15 @@
 - [x] Проверки после UI-этапа: `npm run lint`, `npm run typecheck`, `npm run build` — успешно.
 - [x] После прерывания ECONNRESET повторно проверены документы, `git status`, все page/layout/shared/mock/i18n/entry-файлы и таблица маршрутов; готовые компоненты не переписывались.
 - [x] Повторные проверки после восстановления: `npm run lint`, `npm run typecheck`, `npm run build` — успешно; маршруты `/`, `/debts`, `/contacts`, `/folders`, `/payments`, `/users`, `/archive` и fallback подтверждены в `src/main.tsx`.
+- [x] Dashboard доработан точечно: убраны donut chart и Quick Actions, добавлены три карточки «Общий итог», «Мне должны», «Я должен».
+- [x] График и блок «Последние платежи» размещены рядом на desktop и vertically на мобильных; Recharts сохранён.
+- [x] Добавлен `DebtActionFab`: плавающая кнопка `Plus`, два демо-действия, закрытие по outside click/Escape, `aria-*` и transitions с `motion-reduce`.
+- [x] `DemoActionDialog` расширен опциональным `saveLabel`; для новых модалок кнопка «Сохранить» остаётся disabled.
+- [x] Обновлены `dashboardStats` и i18n-ключи для ru/tj/en без API, CRUD и финансовых расчётов.
+- [x] Проверки после доработки Dashboard: `npm run lint`, `npm run typecheck`, `npm run build` — успешно; `npm run dev` отдал `HTTP 200`.
+- [x] Из списка долгов на странице Debts удалена колонка «Статус» и статусные бейджи; ширины оставшихся колонок перераспределены.
+- [x] Поле `status` оставлено в типах и данных; фильтры, кнопки, действия и другие страницы не изменены.
+- [x] Повторные проверки `npm run lint`, `npm run typecheck`, `npm run build` после правки Debts — успешно.
 
 ## In Progress
 
