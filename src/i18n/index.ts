@@ -65,12 +65,9 @@ const resources = {
         loginLink: 'Войти',
         demoSubmitHint:
           'Кнопка неактивна: вход и регистрация появятся после подключения backend.',
-        sideTitle: 'Финансы под контролем',
+        sideTitle: 'Ваши финансы под контролем',
         sideDescription:
-          'Управляйте долгами, контактами и платежами в одном интерфейсе.',
-        sideDebts: 'Долги',
-        sideContacts: 'Контакты',
-        sidePayments: 'Платежи',
+          'Управляйте долгами, контактами и платежами в одном удобном приложении.',
       },
       nav: {
         dashboard: 'Дашборд',
@@ -201,12 +198,9 @@ const resources = {
         loginLink: 'Ворид шудан',
         demoSubmitHint:
           'Тугма ғайрифаъол аст: воридшавӣ ва бақайдгирӣ пас аз пайвастшавӣ ба backend дастрас мешаванд.',
-        sideTitle: 'Молия зери назорат',
+        sideTitle: 'Молияи шумо зери назорат',
         sideDescription:
-          'Қарзҳо, тамосҳо ва пардохтҳоро дар як интерфейс идора кунед.',
-        sideDebts: 'Қарзҳо',
-        sideContacts: 'Тамосҳо',
-        sidePayments: 'Пардохтҳо',
+          'Қарзҳо, тамосҳо ва пардохтҳоро дар як барномаи қулай идора кунед.',
       },
       nav: {
         dashboard: 'Саҳифаи асосӣ',
@@ -334,12 +328,9 @@ const resources = {
         loginLink: 'Sign in',
         demoSubmitHint:
           'This button is disabled: sign-in and registration will appear after backend integration.',
-        sideTitle: 'Finances under control',
+        sideTitle: 'Your finances under control',
         sideDescription:
-          'Manage debts, contacts, and payments in a single interface.',
-        sideDebts: 'Debts',
-        sideContacts: 'Contacts',
-        sidePayments: 'Payments',
+          'Manage debts, contacts, and payments in one convenient app.',
       },
       nav: {
         dashboard: 'Dashboard',
