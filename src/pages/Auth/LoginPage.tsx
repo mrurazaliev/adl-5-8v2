@@ -41,15 +41,11 @@ export default function LoginPage() {
   })
 
   const onSubmit = async (data: LoginFormValues) => {
-    console.log('Форма прошла валидацию')
-
     setServerError('')
     setSuccessMessage('')
 
     try {
-      const response = await login(data).unwrap()
-
-      console.log('Вход выполнен:', response.user.name)
+      await login(data).unwrap()
 
       setSuccessMessage('Вход выполнен успешно!')
     } catch {
@@ -78,12 +74,7 @@ export default function LoginPage() {
       <form
         className="space-y-5"
         noValidate
-        onSubmit={handleSubmit(
-          onSubmit,
-          (validationErrors) => {
-            console.log('Ошибки валидации:', validationErrors)
-          },
-        )}
+        onSubmit={handleSubmit(onSubmit)}
       >
         <FieldGroup>
           {/* Email */}
@@ -170,12 +161,7 @@ export default function LoginPage() {
         )}
 
         {/* Submit */}
-        <Button
-          type="submit"
-          className="h-10 w-full"
-          disabled={isLoading}
-          onClick={() => console.log('Кнопка нажата')}
-        >
+        <Button type="submit" className="h-10 w-full" disabled={isLoading}>
           {isLoading ? 'Выполняется вход...' : t('auth.login')}
         </Button>
       </form>

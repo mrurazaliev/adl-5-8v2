@@ -615,3 +615,66 @@
 ### Далее
 
 - Создать отдельный коммит `refactor: redesign auth left panel` без push.
+
+---
+
+## 2026-11-19 — Диагностика и исправление 404 на Login
+
+### Цель
+
+Найти точную причину `404 Not Found` при работе страницы входа и исправить её минимальными изменениями без переписывания `LoginPage.tsx`.
+
+### Что проверено перед стартом
+
+- Прочитаны `AGENTS.md`, `PROJECT_CONTEXT.md`, `CODING_STYLE.md`, `TASKS.md` и последние записи `DEVELOPMENT_LOG.md`.
+- Ветка `master`, HEAD `a032e39`, tracked-изменений не было; неотслеживаемые design-ассеты не трогались.
+- Обнаружена незакоммиченная предыдущая работа: `.env.example`, `src/api/baseApi.ts`, `src/pages/Auth/LoginPage.tsx` и каталог `src/features/auth/`.
+- Фактический файл типов называется `authType.ts`, а не `authTypes.ts`, как указано в задаче.
+
+### Диагностика
+
+- `src/main.tsx`: `Provider`, `BrowserRouter` и маршрут `/login` подключены корректно.
+- `LoginPage.tsx`: `handleSubmit(onSubmit)` вызывается, RHF + Zod useForm подключены, `useLoginMutation` используется.
+- `authApi.ts`: мутация `login` использует `POST /api/auth/login`, дублирования `/api` нет.
+- `baseApi.ts`, `store.ts`: `fetchBaseQuery`, reducer и middleware RTK Query подключены правильно.
+- `vite.config.ts`: proxy не настроен, поэтому относительный URL уходил бы на origin Vite.
+- Локального `.env` не было; `.env.example` уже содержал ожидаемый адрес, но Vite его не загружает.
+- `GET http://localhost:4000/health` — `HTTP 200`, `{"status":"ok"}`.
+- `POST http://localhost:4000/api/auth/login` с несуществующими тестовыми данными — `HTTP 401`; маршрут backend зарегистрирован, CORS разрешает origin frontend.
+- До исправления: `GET http://127.0.0.1:4190/login` — `HTTP 200`, но `POST http://127.0.0.1:4190/api/auth/login` — `HTTP 404`.
+
+### Причина
+
+`VITE_API_BASE_URL` был `undefined`, поэтому `fetchBaseQuery` формировал относительный URL `/api/auth/login` и отправлял запрос на порт Vite, а не на backend `http://localhost:4000`. Ошибка возникала при отправке Login-запроса, а не при открытии `/login`.
+
+### Проблемы
+
+- Незакоммиченный `authSlice.ts` содержал JSX в `.ts` файле и ломал `lint`/`typecheck`.
+- В `LoginPage.tsx` оставались debug `console.log`, включая логирование ошибок валидации.
+- Браузерная проверка сети/консоли недоступна; тестовый фреймворк в проекте не настроен, поэтому регрессионный тест не добавлялся.
+
+### Решения
+
+- Предыдущая работа сохранена отдельным коммитом `e64985a`; `authSlice.ts` переименован в `authSlice.tsx` и остался неиспользуемым placeholder без подключения к store.
+- Создан локальный `.env` с единственной публичной переменной `VITE_API_BASE_URL=http://localhost:4000`; файл игнорируется Git.
+- Удалены debug `console.log` из `LoginPage`; отображение ошибок и успешного входа, RHF, Zod, RTK Query, toggle пароля и маршрутизация сохранены.
+- backend, JWT storage, refresh token и protected routes не изменялись и не добавлялись.
+
+### Изменённые файлы в исправлении
+
+- `.env` — локальный файл, не включается в коммит.
+- `src/pages/Auth/LoginPage.tsx` — удалены debug-логи.
+- `PROJECT_CONTEXT.md`, `TASKS.md`, `DEVELOPMENT_LOG.md`.
+
+### Результаты проверок
+
+- `npm run lint` — успешно.
+- `npm run typecheck` — успешно.
+- `npm run build` — успешно, 2798 модулей, warning о размере JS-чанка (~1131 kB).
+- `npm run dev -- --host 127.0.0.1 --port 4191 --strictPort` — `/login` и `/register` отдают `HTTP 200`, лог Vite без ошибок.
+- Собранный JS содержит `http://localhost:4000` и `/api/auth/login`.
+- `POST http://localhost:4000/api/auth/login` с origin `http://127.0.0.1:4191` — `HTTP 401`, `Access-Control-Allow-Origin` совпадает с origin.
+
+### Далее
+
+- Создать отдельный коммит `fix: resolve login 404 error` без push.

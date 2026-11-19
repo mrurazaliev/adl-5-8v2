@@ -21,8 +21,8 @@ Git-репозиторий инициализирован в корне прое
 
 - Node.js: `24.15.0`, npm: `11.12.1`.
 - Package manager: npm.
-- Файл окружения: только `.env.example` со строкой `VITE_API_BASE_URL=`.
-- Реального `.env` в проекте нет; секреты, ключи и пароли не сохранялись.
+- Файл окружения: `.env.example` содержит `VITE_API_BASE_URL=http://localhost:4000`.
+- Локальный `.env` создан с тем же публичным значением и игнорируется Git; секреты, ключи и пароли не сохранялись.
 - Сборка генерирует `dist/` (игнорируется Git).
 
 ## 4. Технологии
@@ -57,6 +57,10 @@ src/
     layout/      # AppShell, SidebarNavigation, PublicLayout, PublicHeader, AuthLayout
     shared/      # PageHeader, StatCard, StatusBadge, FilterBar, DemoActionDialog, EmptyState, DebtActionFab
   features/
+    auth/
+      authApi.ts
+      authType.ts
+      authSlice.tsx
     ui/
       uiSlice.ts
   hooks/
@@ -137,11 +141,12 @@ src/
 
 `src/api/baseApi.ts`:
 
-- `createApi({ reducerPath: 'api', baseQuery: fetchBaseQuery({ baseUrl: import.meta.env.VITE_API_BASE_URL ?? '' }), endpoints: () => ({}) })`.
-- Конкретных endpoint’ов нет.
+- `createApi({ reducerPath: 'api', baseQuery: fetchBaseQuery({ baseUrl: import.meta.env.VITE_API_BASE_URL }), endpoints: () => ({}) })`.
+- `src/features/auth/authApi.ts` добавляет через `injectEndpoints` мутацию `login`: `POST /api/auth/login` с типами `LoginRequest`/`LoginResponse` из `authType.ts`.
+- `authSlice.tsx` — неиспользуемый placeholder, в store не подключён; JWT storage, refresh и protected routes не реализованы.
 - `tagTypes` не определены, пока не известны реальные ресурсы backend.
 - Base API подключён к store; новая логика должна добавляться через `baseApi.injectEndpoints`.
-- loading/error, кэш, рефетч и инвалидация будут обеспечиваться RTK Query после появления endpoint’ов.
+- loading/error и состояние отправки login обеспечиваются RTK Query.
 
 ## 9. i18n
 
@@ -169,8 +174,9 @@ src/
 
 ## 11. Ограничения backend
 
-- backend существует и запущен локально **по условию задачи**, но его исходники и endpoint’ы в этом репозитории недоступны.
-- Реальные пути, форматы запросов/ответов и механизм авторизации не изучены.
+- backend запущен локально на `http://localhost:4000`; `GET /health` возвращает `{"status":"ok"}`.
+- Контракт login задан владельцем: `POST /api/auth/login`, payload `{ email, password }`, ответ `{ user, accessToken, refreshToken }`. Реальный POST с тестовыми несуществующими данными вернул `401`, что подтверждает наличие маршрута.
+- Исходники backend и контракты остальных ресурсов в этом репозитории недоступны; механизм авторизации и хранения токенов не изучался.
 - Нельзя придумывать URL для debts, contacts, folders, payments, users, archive и других ресурсов.
 - Не создавать mock backend, базу данных или фейковые хуки. Временные UI-данные для визуального каркаса допустимы только в `src/mocks/mockData.ts` и не должны выдаваться за данные backend.
 - Не изменять backend.
@@ -202,6 +208,10 @@ src/
 22. Login и Register оставлены статичными: нейтральный `identifier`, пароль с toggles, отключённые кнопки отправки, без RHF/Zod, API, токенов и автоперехода. Точный формат identifier будет уточняться после изучения backend.
 
 23. Левая панель `AuthLayout` переработана в минималистичном стиле: удалены яркий градиент, сетка, три карточки и демо-подпись; фон `#111820`, три угловых radial-gradient свечения с заданными rgba-значениями. Правый блок и общая логика auth-страниц не изменены.
+24. Пункт 22 утратил силу для Login: после отдельного коммита `e64985a` форма использует RHF + Zod и RTK Query mutation; Register остался статичным.
+25. Незакоммиченная предыдущая работа по login сохранена отдельным коммитом `e64985a`; пустой JSX-файл переименован из `authSlice.ts` в `authSlice.tsx` и не подключён к store.
+26. Причина 404: локальный `.env` отсутствовал, поэтому `VITE_API_BASE_URL` был `undefined` и `fetchBaseQuery` отправлял запрос на origin Vite — `http://localhost:4190/api/auth/login`. Исправлено созданием локального `.env` с `VITE_API_BASE_URL=http://localhost:4000`; итоговый URL — `http://localhost:4000/api/auth/login`.
+27. Debug `console.log` удалены; пользователю показывается безопасное сообщение об ошибке, токены и пароли в консоль не выводятся.
 
 ## 13. Статус проверок
 
@@ -209,11 +219,13 @@ src/
 
 - `npm run lint` — без ошибок и предупреждений.
 - `npm run typecheck` — без ошибок.
-- `npm run build` — успешно, 2698 модулей; Vite предупреждает о размере JS-чанка (~1011 kB) из-за Recharts и общего bundle.
-- `npm run dev -- --host 127.0.0.1 --port 4189 --strictPort` — `/login` и `/register` отдают `HTTP 200`; лог Vite без ошибок.
-- На предыдущем этапе `npm run dev -- --host 127.0.0.1 --port 4188 --strictPort` подтвердил `HTTP 200` для `/`, `/dashboard`, `/debts`, `/contacts`, `/folders`, `/payments`, `/users`, `/archive` и `/unknown`.
-- `npm audit --audit-level=moderate` — `found 0 vulnerabilities` на предыдущем этапе.
-- Grep подтвердил отсутствие в `AuthLayout` яркого градиента, сетки, карточек, демо-подписи и выдуманных auth API/запросов.
+- `npm run build` — успешно, 2798 модулей; Vite предупреждает о размере JS-чанка (~1131 kB) из-за Recharts и общего bundle.
+- `npm run dev -- --host 127.0.0.1 --port 4191 --strictPort` — `/login` и `/register` отдают `HTTP 200`; лог Vite без ошибок.
+- `GET http://localhost:4000/health` — `HTTP 200`, `{"status":"ok"}`.
+- `POST http://localhost:4000/api/auth/login` с несуществующими тестовыми данными — `HTTP 401`, заголовок CORS разрешает origin frontend; маршрут backend существует.
+- До исправления `POST http://127.0.0.1:4190/api/auth/login` — `HTTP 404`; после добавления `.env` собранный JS содержит `http://localhost:4000` и `/api/auth/login`.
+- На предыдущих этапах `npm run dev` на портах 4188/4189 подтвердил `HTTP 200` для публичных и внутренних маршрутов; `npm audit --audit-level=moderate` — `found 0 vulnerabilities`.
+- Grep подтвердил отсутствие в `AuthLayout` яркого градиента, сетки, карточек, демо-подписи и `console.log` в исходниках.
 - Браузерная проверка адаптивности, JS-рендера публичного сайта и консоли в текущем окружении недоступна; webfetch вернул только статическую SPA-оболочку.
 
 ## 14. Команды
