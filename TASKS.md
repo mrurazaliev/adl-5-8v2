@@ -26,6 +26,9 @@
 - [x] Инициализация Git-репозитория и создание начального коммита `d9a690a694345fbdf41169cdcb76a594e26ef694`.
 - [x] Создание project-level `opencode.jsonc` с проверенной по официальной схеме автоматической компакцией.
 - [x] Обновление `AGENTS.md`, `PROJECT_CONTEXT.md`, `TASKS.md` и `DEVELOPMENT_LOG.md` под текущее состояние проекта.
+- [x] Проверка `AGENTS.md`, `PROJECT_CONTEXT.md`, `CODING_STYLE.md` и `opencode.jsonc`: расхождений с кодом и текущими решениями не найдено.
+- [x] Повторная проверка `opencode.jsonc` по официальной схеме OpenCode: все параметры поддерживаются, устаревшие ключи не используются.
+- [x] Повторные проверки `npm run lint`, `npm run typecheck`, `npm run build`, валидации JSON/ключей `opencode.jsonc` и `git diff --check`.
 
 ## In Progress
 
