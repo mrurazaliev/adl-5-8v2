@@ -75,6 +75,12 @@
 - [x] Создан локальный `.env` с публичным `VITE_API_BASE_URL=http://localhost:4000` (Git-игнорируемый, без секретов).
 - [x] Удалены debug `console.log` из `LoginPage`; пользовательские ошибки остаются безопасными, токены и пароли не логируются.
 - [x] Проверки после исправления: `npm run lint`, `npm run typecheck`, `npm run build` — успешно; `/login` и `/register` отдают `HTTP 200`; собранный JS содержит корректный base URL и путь логина.
+- [x] Проверен `contactsApi.ts`: endpoint `GET /api/contacts`, тип `Contact` соответствует структуре из задания/Swagger; локальный Swagger-файл в репозитории отсутствует.
+- [x] `ContactsPage.tsx`: удалён дублирующийся импорт `useGetContactsQuery`, добавлен `isFetching`, удалены повторяющиеся Loading/Error/Empty блоки внутри карточек.
+- [x] `contacts` в `ContactsPage` поступает только из `useGetContactsQuery`; импорт и использование `@/mocks/mockData` отсутствуют.
+- [x] Сохранены поиск по имени/email/телефону, Skeleton, Error State, Empty State, Retry, обновление по `isFetching` и демо-диалог Add/Edit.
+- [x] Локальная проверка `npx eslint src/pages/Contacts/ContactsPage.tsx` и target `tsc` для Contacts прошли; `npx vite build` прошёл.
+- [x] Полные `npm run lint`, `npm run typecheck` и `npm run build` заблокированы незакоммиченными посторонними файлами (`contactsSlice.ts`, `LoginPage.tsx`, `RegisterPage.tsx`), не изменёнными в этом этапе.
 
 ## In Progress
 

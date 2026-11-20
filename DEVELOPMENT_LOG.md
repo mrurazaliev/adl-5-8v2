@@ -678,3 +678,64 @@
 ### Далее
 
 - Создать отдельный коммит `fix: resolve login 404 error` без push.
+
+---
+
+## 2026-11-19 — Интеграция реальных контактов в ContactsPage
+
+### Цель
+
+Убрать моковые данные и дублирующие состояния из `ContactsPage`, оставив получение контактов только через RTK Query и сохранив текущий дизайн.
+
+### Что проверено перед стартом
+
+- Прочитаны `AGENTS.md`, `PROJECT_CONTEXT.md`, `CODING_STYLE.md`, `TASKS.md` и последние записи `DEVELOPMENT_LOG.md`.
+- Ветка `master`, HEAD `a6cb1de`.
+- В рабочем дереве обнаружены незакоммиченные посторонние изменения в auth/store/main и новых auth/contacts файлах; они не перезаписывались.
+- Локальный Swagger-файл в репозитории отсутствует; структура `Contact` сверена с контрактом из задачи.
+- `GET http://localhost:4000/health` — `HTTP 200`; `GET http://localhost:4000/api/contacts` без токена — `HTTP 401`, то есть маршрут существует.
+
+### Найденные ошибки
+
+- Двойной импорт `useGetContactsQuery` из `@/features/contacts/contactsApi`.
+- `isFetching` использовался в кнопке и иконке, но отсутствовал в результате хука.
+- Внутри каждой карточки дублировались Loading, Error и Empty State, хотя общие состояния уже были выше.
+- Импорт `contacts` из `@/mocks/mockData` уже был убран незакоммиченной работой, но требовалось подтвердить отсутствие fallback при пустом ответе.
+
+### Что исправлено
+
+- Удалён второй импорт `useGetContactsQuery`.
+- В результат `useGetContactsQuery()` добавлен `isFetching` с корректным отступом.
+- Удалены внутренние блоки Loading/Error/Empty внутри карточек.
+- `contacts` остаётся только данными из `useGetContactsQuery()`.
+- Сохранены поиск по имени, email и телефону, Skeleton, Error State, Empty State, Retry, демо-диалог Add/Edit и адаптивная сетка.
+
+### Изменённые файлы
+
+- `src/pages/Contacts/ContactsPage.tsx`.
+- `CODING_STYLE.md`, `PROJECT_CONTEXT.md`, `TASKS.md`, `DEVELOPMENT_LOG.md`.
+- `src/features/contacts/contactsApi.ts` проверен, но не изменялся: endpoint и поля соответствуют заданию.
+
+### Проблемы
+
+- Полные `npm run lint`, `npm run typecheck` и `npm run build` не проходят из-за посторонних незакоммиченных файлов: syntax error в `contactsSlice.ts` и неиспользуемые переменные в `LoginPage.tsx`/`RegisterPage.tsx`.
+- Реальные контакты не получены: нет тестовых учётных данных, запрос без токена ожидаемо вернул `401`.
+- Браузерная проверка недоступна.
+
+### Решения
+
+- Посторонние файлы не изменялись и не включались в коммит.
+- Для проверки собственного кода использованы `npx eslint` на `ContactsPage`, временный целевой tsconfig вне репозитория и `npx vite build`.
+- Авторизация в `baseApi.ts` не трогалась; `prepareHeaders` продолжает использовать существующий токен.
+
+### Результаты проверок
+
+- `npx eslint src/pages/Contacts/ContactsPage.tsx` — успешно.
+- Target `npx tsc` для `ContactsPage.tsx` и `contactsApi.ts` — успешно.
+- `npx vite build` — успешно.
+- Grep: один импорт `useGetContactsQuery`, `isFetching` в destructuring и кнопке, `mockData` в `ContactsPage` отсутствует.
+- `npm run lint`, `npm run typecheck`, `npm run build` — заблокированы посторонними файлами.
+
+### Далее
+
+- Создать отдельный коммит `fix: use real contacts in ContactsPage` без push.

@@ -143,6 +143,7 @@ src/
 
 - `createApi({ reducerPath: 'api', baseQuery: fetchBaseQuery({ baseUrl: import.meta.env.VITE_API_BASE_URL }), endpoints: () => ({}) })`.
 - `src/features/auth/authApi.ts` добавляет через `injectEndpoints` мутацию `login`: `POST /api/auth/login` с типами `LoginRequest`/`LoginResponse` из `authType.ts`.
+- `src/features/contacts/contactsApi.ts` добавляет query `getContacts`: `GET /api/contacts`, тип `Contact` совпадает со структурой из задания/Swagger.
 - `authSlice.tsx` — неиспользуемый placeholder, в store не подключён; JWT storage, refresh и protected routes не реализованы.
 - `tagTypes` не определены, пока не известны реальные ресурсы backend.
 - Base API подключён к store; новая логика должна добавляться через `baseApi.injectEndpoints`.
@@ -176,7 +177,8 @@ src/
 
 - backend запущен локально на `http://localhost:4000`; `GET /health` возвращает `{"status":"ok"}`.
 - Контракт login задан владельцем: `POST /api/auth/login`, payload `{ email, password }`, ответ `{ user, accessToken, refreshToken }`. Реальный POST с тестовыми несуществующими данными вернул `401`, что подтверждает наличие маршрута.
-- Исходники backend и контракты остальных ресурсов в этом репозитории недоступны; механизм авторизации и хранения токенов не изучался.
+- Контракт contacts задан владельцем: `GET /api/contacts`; `Contact` содержит `id`, `user_id`, `folder_id`, `name`, `phone`, `email`, `note`, `created_at`, `updated_at`. Запрос без токена вернул `401`, маршрут существует; реальные данные без учётных данных не проверялись.
+- Исходники backend и контракты остальных ресурсов в этом репозитории недоступны; механизм хранения токенов не изучался.
 - Нельзя придумывать URL для debts, contacts, folders, payments, users, archive и других ресурсов.
 - Не создавать mock backend, базу данных или фейковые хуки. Временные UI-данные для визуального каркаса допустимы только в `src/mocks/mockData.ts` и не должны выдаваться за данные backend.
 - Не изменять backend.
@@ -212,6 +214,9 @@ src/
 25. Незакоммиченная предыдущая работа по login сохранена отдельным коммитом `e64985a`; пустой JSX-файл переименован из `authSlice.ts` в `authSlice.tsx` и не подключён к store.
 26. Причина 404: локальный `.env` отсутствовал, поэтому `VITE_API_BASE_URL` был `undefined` и `fetchBaseQuery` отправлял запрос на origin Vite — `http://localhost:4190/api/auth/login`. Исправлено созданием локального `.env` с `VITE_API_BASE_URL=http://localhost:4000`; итоговый URL — `http://localhost:4000/api/auth/login`.
 27. Debug `console.log` удалены; пользователю показывается безопасное сообщение об ошибке, токены и пароли в консоль не выводятся.
+28. `ContactsPage` получает контакты только через `useGetContactsQuery`; моковые данные на странице полностью убраны, пустой ответ backend не подменяется моками.
+29. В `ContactsPage` удалены дублирующийся импорт хука и внутренние Loading/Error/Empty блоки внутри карточек; кнопка обновления использует `isFetching`.
+30. Незакоммиченные посторонние файлы (`baseApi.ts`, `store.ts`, `main.tsx`, auth/register/protected route, `contactsSlice.ts`) в этом этапе не изменялись; полные проверки проекта заблокированы ошибками в части из них.
 
 ## 13. Статус проверок
 
@@ -227,6 +232,13 @@ src/
 - На предыдущих этапах `npm run dev` на портах 4188/4189 подтвердил `HTTP 200` для публичных и внутренних маршрутов; `npm audit --audit-level=moderate` — `found 0 vulnerabilities`.
 - Grep подтвердил отсутствие в `AuthLayout` яркого градиента, сетки, карточек, демо-подписи и `console.log` в исходниках.
 - Браузерная проверка адаптивности, JS-рендера публичного сайта и консоли в текущем окружении недоступна; webfetch вернул только статическую SPA-оболочку.
+
+Проверки этапа Contacts:
+
+- `npx eslint src/pages/Contacts/ContactsPage.tsx` — успешно; Grep подтвердил один импорт `useGetContactsQuery`, `isFetching` и отсутствие `mockData`.
+- Target `npx tsc` для Contacts и `npx vite build` — успешно.
+- `npm run lint`, `npm run typecheck`, `npm run build` — заблокированы незакоммиченными посторонними файлами: синтаксис в `contactsSlice.ts` и неиспользуемые переменные в `LoginPage.tsx`/`RegisterPage.tsx`.
+- `GET http://localhost:4000/api/contacts` без токена — `HTTP 401`; реальные контакты не запрашивались.
 
 ## 14. Команды
 
