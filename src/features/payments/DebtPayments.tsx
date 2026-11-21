@@ -116,6 +116,7 @@ export function DebtPayments({ debt, disabled = false, readOnly = false, initial
         {!readOnly && debt.status !== 'paid' && <Card className="border-border/70 shadow-sm">
           <CardHeader><CardTitle>{t('pages.payments.addTitle')}</CardTitle></CardHeader>
           <CardContent>
+            <p className="mb-4 rounded-lg bg-warning/10 p-3 text-sm text-foreground">{t('pages.payments.overpaymentHint')}</p>
             <form noValidate onSubmit={handleSubmit(onSubmit)}>
               <fieldset disabled={isSaving || disabled}>
                 <FieldGroup>

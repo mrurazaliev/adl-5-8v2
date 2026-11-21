@@ -132,6 +132,7 @@ export default function DebtsPage() {
           <CardTitle>{t('pages.debts.title')}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
+          <p className="rounded-lg bg-muted/50 p-3 text-sm text-muted-foreground">{t('pages.debts.financialHint')}</p>
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
             <Select value={filters.direction ?? 'all'} onValueChange={(value) => setFilters({ ...filters, direction: value === 'all' ? undefined : value as DebtFilters['direction'] })}>
               <SelectTrigger className="w-full" aria-label={t('pages.debts.direction')}><SelectValue /></SelectTrigger>
@@ -173,7 +174,7 @@ export default function DebtsPage() {
               <TableHeader><TableRow>
                 <TableHead>{t('pages.debts.contact')}</TableHead>
                 <TableHead>{t('pages.debts.direction')}</TableHead>
-                <TableHead>{t('pages.debts.amount')}</TableHead>
+                <TableHead>{t('pages.debts.originalAmount')}</TableHead>
                 <TableHead>{t('common.status')}</TableHead>
                 <TableHead>{t('pages.debts.due_date')}</TableHead>
                 <TableHead>{t('pages.debts.description')}</TableHead>
@@ -268,11 +269,12 @@ export default function DebtsPage() {
           {viewedDebt && <><dl className="grid grid-cols-[auto_1fr] gap-3 text-sm">
             <dt className="text-muted-foreground">{t('pages.debts.contact')}</dt><dd className="break-words">{contactName(viewedDebt.contact_id)}</dd>
             <dt className="text-muted-foreground">{t('pages.debts.direction')}</dt><dd>{t(`pages.debts.${viewedDebt.direction}`)}</dd>
-            <dt className="text-muted-foreground">{t('pages.debts.amount')}</dt><dd>{viewedDebt.amount} {viewedDebt.currency}</dd>
+            <dt className="text-muted-foreground">{t('pages.debts.originalAmount')}</dt><dd>{viewedDebt.amount} {viewedDebt.currency}</dd>
             <dt className="text-muted-foreground">{t('common.status')}</dt><dd>{t(`pages.debts.${viewedDebt.status}`)}</dd>
             <dt className="text-muted-foreground">{t('pages.debts.due_date')}</dt><dd>{viewedDebt.due_date?.slice(0, 10) ?? '—'}</dd>
             <dt className="text-muted-foreground">{t('pages.debts.description')}</dt><dd className="min-w-0 whitespace-pre-wrap break-words">{viewedDebt.description || '—'}</dd>
           </dl>
+          <p className="text-sm text-muted-foreground">{t('pages.debts.financialHint')}</p>
           {viewedDebt.status === 'paid' && <p role="status" className="rounded-lg bg-success/10 p-3 text-sm text-success">{t('pages.debts.archivedNotice')}</p>}
           <DebtPayments key={viewedDebt.id} debt={viewedDebt} disabled={detailsLoading || detailsError} readOnly={viewedDebt.status === 'paid'} onSavingChange={setPaymentSaving} />
           </>}

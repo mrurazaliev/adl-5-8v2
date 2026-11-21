@@ -3,6 +3,8 @@ import { debtCreationTranslations } from '@/i18n/debtCreation'
 export const debtsTranslations = {
   ru: {
     creation: debtCreationTranslations.ru,
+    originalAmount: 'Исходная сумма',
+    financialHint: 'Показаны исходные суммы и статусы долгов с сервера. Остаток после платежей и встречная задолженность после переплаты недоступны в API. Статус «Погашен» сам по себе не подтверждает баланс 0:0.',
     title: 'Долги', subtitle: 'Активные долги: ожидают оплаты или частично погашены',
     archivedNotice: 'Сервер пометил долг как погашенный. Он теперь доступен в Архиве; история платежей сохранена.',
     contact: 'Контакт', direction: 'Направление', amount: 'Сумма', currency: 'Валюта',
@@ -30,6 +32,8 @@ export const debtsTranslations = {
   },
   tj: {
     creation: debtCreationTranslations.tj,
+    originalAmount: 'Маблағи ибтидоӣ',
+    financialHint: 'Маблағҳои ибтидоӣ ва вазъияти қарзҳо аз сервер нишон дода мешаванд. Бақияи пас аз пардохт ва қарзи муқобил пас аз пардохти зиёдатӣ дар API дастрас нестанд. Вазъияти «Пардохтшуда» худ аз худ бақияи 0:0-ро тасдиқ намекунад.',
     title: 'Қарзҳо', subtitle: 'Қарзҳои фаъол: интизори пардохт ё қисман пардохтшуда',
     archivedNotice: 'Сервер қарзро пардохтшуда нишон дод. Он ҳоло дар Бойгонӣ дастрас аст; таърихи пардохтҳо нигоҳ дошта шуд.',
     contact: 'Тамос', direction: 'Самт', amount: 'Маблағ', currency: 'Асъор',
@@ -57,6 +61,8 @@ export const debtsTranslations = {
   },
   en: {
     creation: debtCreationTranslations.en,
+    originalAmount: 'Original amount',
+    financialHint: 'These are original amounts and debt statuses from the server. The API does not provide remaining amounts or reciprocal obligations after overpayment. Paid status alone does not confirm a 0:0 balance.',
     title: 'Debts', subtitle: 'Active debts: pending or partially paid',
     archivedNotice: 'The server marked this debt as paid. It is now available in Archive; payment history is preserved.',
     contact: 'Contact', direction: 'Direction', amount: 'Amount', currency: 'Currency',

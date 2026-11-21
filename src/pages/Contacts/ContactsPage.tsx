@@ -10,6 +10,7 @@ import {
   Trash2,
 } from 'lucide-react'
 import { toast } from 'sonner'
+import { ContactDebts } from '@/features/contacts/ContactDebts'
 
 import {
   useCreateContactMutation,
@@ -68,6 +69,7 @@ export default function ContactsPage() {
   const [emailRequired, setEmailRequired] = useState(false)
   const [saveError, setSaveError] = useState(false)
   const [deletingContact, setDeletingContact] = useState<Contact | null>(null)
+  const [viewingContact, setViewingContact] = useState<Contact | null>(null)
   const [search, setSearch] = useState('')
 
   const {
@@ -314,7 +316,10 @@ export default function ContactsPage() {
                   )}
                 </div>
 
-                <div className="flex items-center justify-end gap-1 border-t border-border/70 pt-3">
+                <div className="flex flex-wrap items-center justify-end gap-1 border-t border-border/70 pt-3">
+                  <Button type="button" variant="outline" size="sm" onClick={() => setViewingContact(contact)}>
+                    {t('pages.debts.title')}
+                  </Button>
                   <Button
                     type="button"
                     variant="ghost"
@@ -341,6 +346,16 @@ export default function ContactsPage() {
           ))}
         </div>
       )}
+
+      <Dialog open={viewingContact !== null} onOpenChange={(value) => { if (!value) setViewingContact(null) }}>
+        <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>{t('pages.debts.title')}</DialogTitle>
+            <DialogDescription className="break-words">{viewingContact?.name}</DialogDescription>
+          </DialogHeader>
+          {viewingContact && <ContactDebts key={viewingContact.id} contactId={viewingContact.id} />}
+        </DialogContent>
+      </Dialog>
 
       <Dialog
         open={open}

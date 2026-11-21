@@ -1,5 +1,6 @@
 ﻿export const paymentsTranslations = {
   ru: {
+    overpaymentHint: 'Сумма сверх долга сохраняется как платёж, но API не возвращает встречную задолженность. Переплата не появится автоматически как долг противоположного направления.',
     title: 'Платежи', subtitle: 'Платежи по долговым записям',
     history: 'История платежей', hideHistory: 'Скрыть историю платежей',
     addTitle: 'Новый платёж', addPayment: 'Добавить платёж', amount: 'Сумма',
@@ -13,6 +14,7 @@
     validation: { amount: 'Введите число больше 0 и не больше 1 000 000 000.', note: 'Примечание — не более 500 символов.', date: 'Введите действительные дату и время.' },
   },
   tj: {
+    overpaymentHint: 'Маблағи зиёда аз қарз ҳамчун пардохт нигоҳ дошта мешавад, аммо API қарзи муқобилро барнамегардонад. Пардохти зиёдатӣ худкор ҳамчун қарзи самти муқобил нишон дода намешавад.',
     title: 'Пардохтҳо', subtitle: 'Пардохтҳо аз рӯи қарзҳо',
     history: 'Таърихи пардохтҳо', hideHistory: 'Пинҳон кардани таърихи пардохтҳо',
     addTitle: 'Пардохти нав', addPayment: 'Иловаи пардохт', amount: 'Маблағ',
@@ -26,6 +28,7 @@
     validation: { amount: 'Рақами аз 0 калон ва на бештар аз 1 000 000 000 ворид кунед.', note: 'Эзоҳ набояд аз 500 аломат зиёд бошад.', date: 'Сана ва вақти дурустро ворид кунед.' },
   },
   en: {
+    overpaymentHint: 'An amount above the debt is recorded as a payment, but the API does not return a reciprocal obligation. Overpayment will not automatically appear as a debt in the opposite direction.',
     title: 'Payments', subtitle: 'Payments against debts',
     history: 'Payment history', hideHistory: 'Hide payment history',
     addTitle: 'New payment', addPayment: 'Add payment', amount: 'Amount',
