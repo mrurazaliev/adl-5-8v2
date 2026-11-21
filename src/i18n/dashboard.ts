@@ -1,5 +1,8 @@
+import { monthlyDebtChartTranslations } from '@/i18n/monthlyDebtChart'
+
 export const dashboardTranslations = {
   ru: {
+    monthly: monthlyDebtChartTranslations.ru,
     title: 'Дашборд', subtitle: 'Долги, контакты и сроки возврата', stats: 'Финансовый обзор',
     owedToMe: 'Мне должны', iOwe: 'Я должен', netBalance: 'Чистый баланс',
     amountUnavailable: 'Сумма недоступна',
@@ -19,6 +22,7 @@ export const dashboardTranslations = {
     manageDebts: 'Перейти к долгам', currencyUnavailable: 'Валюта не указана',
   },
   tj: {
+    monthly: monthlyDebtChartTranslations.tj,
     title: 'Саҳифаи асосӣ', subtitle: 'Қарзҳо, тамосҳо ва муҳлатҳои баргардонӣ', stats: 'Шарҳи молиявӣ',
     owedToMe: 'Ба ман қарздоранд', iOwe: 'Ман қарздорам', netBalance: 'Бақияи холис',
     amountUnavailable: 'Маблағ дастрас нест',
@@ -38,6 +42,7 @@ export const dashboardTranslations = {
     manageDebts: 'Гузариш ба қарзҳо', currencyUnavailable: 'Асъор нишон дода нашудааст',
   },
   en: {
+    monthly: monthlyDebtChartTranslations.en,
     title: 'Dashboard', subtitle: 'Debts, contacts and due dates', stats: 'Financial overview',
     owedToMe: 'Owed to me', iOwe: 'I owe', netBalance: 'Net balance',
     amountUnavailable: 'Amount unavailable',

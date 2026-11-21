@@ -57,7 +57,7 @@ export const contactsApi = baseApi.injectEndpoints({
         url: `/api/contacts/${id}`,
         method: 'DELETE',
       }),
-      invalidatesTags: ['Contact', 'Dashboard'],
+      invalidatesTags: ['Contact', 'Debt', 'Dashboard'],
     }),
 
   }),

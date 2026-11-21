@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { lazy, Suspense, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import { isValid, parseISO } from 'date-fns'
@@ -11,6 +11,8 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
+
+const MonthlyDebtChart = lazy(() => import('@/features/dashboard/MonthlyDebtChart'))
 
 export default function DashboardPage() {
   const { t, i18n } = useTranslation()
@@ -94,7 +96,14 @@ export default function DashboardPage() {
           </section>
 
           {total === 0 && <EmptyState title={t('pages.dashboard.emptyTitle')} description={t('pages.dashboard.emptyHint')} />}
+        </>
+      )}
 
+      <Suspense fallback={<div role="status" aria-label={t('pages.dashboard.monthly.loading')}><Skeleton className="h-96 w-full" /></div>}>
+        <MonthlyDebtChart />
+      </Suspense>
+
+      {!isLoading && !isError && summary && (
           <section className="grid min-w-0 items-start gap-4 xl:grid-cols-2">
             <Card className="min-w-0 border-border/70 shadow-sm">
               <CardHeader>
@@ -184,7 +193,6 @@ export default function DashboardPage() {
               </CardContent>
             </Card>
           </section>
-        </>
       )}
 
       <Button type="button" size="icon-lg" aria-label={t('pages.debts.addTitle')} onClick={() => setOpen(true)} className="fixed right-4 bottom-4 z-40 size-12 rounded-full shadow-xl sm:right-6 sm:bottom-6">
