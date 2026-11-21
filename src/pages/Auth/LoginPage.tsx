@@ -1,15 +1,17 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Eye, EyeOff } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-
 import { Button } from '@/components/ui/button'
 import { Field, FieldGroup, FieldLabel } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { useLoginMutation } from '@/features/auth/authApi'
+import { useDispatch,} from 'react-redux'
+import { setCredentials } from '@/features/auth/authSlice'
+import AuthTest from '@/components/shared/authTests'
+import { Link, useNavigate } from 'react-router-dom'
 
 // Zod Schema
 const loginSchema = z.object({
@@ -21,6 +23,10 @@ type LoginFormValues = z.infer<typeof loginSchema>
 
 export default function LoginPage() {
   const { t } = useTranslation()
+
+  const navigate = useNavigate()
+
+  const dispatch=useDispatch()
 
   const [showPassword, setShowPassword] = useState(false)
   const [serverError, setServerError] = useState('')
@@ -40,20 +46,24 @@ export default function LoginPage() {
     },
   })
 
-  const onSubmit = async (data: LoginFormValues) => {
-    setServerError('')
-    setSuccessMessage('')
+const onSubmit = async (data: LoginFormValues) => {
+  setServerError('')
 
-    try {
-      await login(data).unwrap()
+  try {
+    const response = await login(data).unwrap()
+    localStorage.setItem('refreshToken', response.refreshToken)
+    dispatch(
+      setCredentials({
+        user: response.user,
+        accessToken: response.accessToken,
+      }),
+    )
 
-      setSuccessMessage('Вход выполнен успешно!')
-    } catch {
-      setServerError(
-        'Не удалось войти. Проверьте email, пароль и соединение с сервером.',
-      )
-    }
+    navigate('/dashboard', { replace: true })
+  } catch {
+    setServerError('Неверный email или пароль.')
   }
+}
 
   return (
     <div className="space-y-7">
@@ -175,6 +185,7 @@ export default function LoginPage() {
           {t('auth.registerLink')}
         </Link>
       </p>
+      <AuthTest/>
     </div>
   )
 }

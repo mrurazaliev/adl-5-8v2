@@ -739,3 +739,66 @@
 ### Далее
 
 - Создать отдельный коммит `fix: use real contacts in ContactsPage` без push.
+
+---
+
+## 2026-11-21 — Меню пользователя, профиль и logout
+
+### Цель
+
+Добавить профильное меню в защищённый layout, страницу `/profile` и настоящий выход через уже существующий backend, не изменяя backend и не трогая посторонние незакоммиченные файлы.
+
+### Что проверено перед стартом
+
+- Прочитаны `AGENTS.md`, `PROJECT_CONTEXT.md`, `CODING_STYLE.md`, `TASKS.md` и последние записи `DEVELOPMENT_LOG.md`.
+- Ветка `master`, HEAD `02efbe2`.
+- Рабочее дерево содержало незакоммиченные auth/store/main/register/dashboard/contacts файлы; посторонние файлы не перезаписывались.
+- Фактический файл типов называется `authType.ts`, а не `authTypes.ts`; файл защищённого маршрута называется `ProtextedRotues.tsx`, компонент внутри — `ProtectedRoute`.
+- `GET http://localhost:4000/health` — `HTTP 200`; `OPTIONS http://localhost:4000/api/auth/logout` — `HTTP 204`; `GET http://localhost:4000/api/users/me` без токена — `HTTP 401`.
+- Контракт `PATCH /api/users/me` не проверен, поэтому редактирование профиля не добавлялось.
+
+### Запрос к владельцу
+
+Полные проверки до начала работы падали из-за посторонних незакоммиченных файлов: синтаксис в `contactsSlice.ts`, неиспользуемые переменные в `LoginPage.tsx`/`RegisterPage.tsx`, неиспользуемый `body` в `authApi.ts` и использование `response` до объявления в `RegisterPage.tsx`. Владелец выбрал вариант не изменять посторонние файлы, поэтому эти ошибки оставлены без правок.
+
+### Что реализовано
+
+- `src/components/layout/ProfileMenu.tsx`: кнопка после ThemeSwitcher, аватар с первой буквой, имя из `state.auth.user`, стрелка, нейтральный fallback, адаптивное скрытие имени на мобильных.
+- Dropdown на существующем shadcn/ui `DropdownMenu`: аватар, имя, email, разделитель, «Мой профиль» с `UserRound`, «Выйти из аккаунта» с `LogOut` и destructive-стилем.
+- `src/pages/Profile/ProfilePage.tsx`: данные только из `useGetMeQuery`, Skeleton, Error State с Retry, имя, email, дата регистрации и аватар.
+- `src/main.tsx`: маршрут `/profile` внутри `ProtectedRoute`; `Toaster` из уже установленного sonner подключён один раз.
+- `src/features/auth/authApi.ts` и `authType.ts`: logout mutation `POST /api/auth/logout` с телом `{ refreshToken }`.
+- Logout: получает refreshToken из localStorage, не отправляет запрос без токена, при ошибке показывает понятный toast, всегда удаляет refreshToken, очищает Redux auth state и кэш RTK Query, закрывает меню и перенаправляет на `/login`.
+- Повторные нажатия Logout блокируются локальным флагом и состоянием mutation.
+
+### Изменённые файлы
+
+- `src/components/layout/AppShell.tsx`, `src/components/layout/ProfileMenu.tsx`, `src/pages/Profile/ProfilePage.tsx`, `src/main.tsx`.
+- `src/features/auth/authApi.ts`, `src/features/auth/authType.ts`.
+- `PROJECT_CONTEXT.md`, `TASKS.md`, `DEVELOPMENT_LOG.md`.
+- В commit включается существующая auth-инфраструктура, без которой новый маршрут и меню не работают: `baseApi.ts`, `store.ts`, `authSlice.ts`, `userApi.ts`, `AuthInitializer.tsx`, `ProtextedRotues.tsx`, `LoginPage.tsx`, `AuthTests.tsx`.
+
+### Проблемы
+
+- Полные `npm run lint`, `npm run typecheck` и `npm run build` остаются заблокированными посторонними файлами по прямому решению владельца.
+- Браузер и реальные учётные данные недоступны, поэтому визуальное поведение dropdown, клавиатура, повторный login и восстановление сессии после перезагрузки требуют ручной проверки.
+
+### Решения
+
+- Посторонние файлы с ошибками не изменялись.
+- ThemeSwitcher и `PublicHeader` не трогались; меню добавлено только в защищённый `AppShell`.
+- Для проверки нового кода использованы targeted ESLint, целевой tsconfig вне репозитория и `npx vite build`.
+- В целевом tsconfig отключён `noUnusedParameters` только из-за существующей ошибки в `authApi.ts`; исходный файл не изменялся сверх добавления logout.
+
+### Результаты проверок
+
+- Targeted ESLint для `ProfileMenu.tsx`, `ProfilePage.tsx`, `AppShell.tsx`, `main.tsx` — успешно.
+- Targeted TypeScript для auth/profile/layout файлов — успешно.
+- `npx vite build` — успешно, только warning о размере чанка.
+- Dev-сервер на `127.0.0.1:4192` — `HTTP 200` для `/profile` и `/login`.
+- Полные проверки — заблокированы указанными посторонними файлами.
+
+### Далее
+
+- Создать отдельный коммит `feat: add profile menu and logout` без push.
+- Передать владельцу список проверок, которые требуют ручного тестирования с реальной сессией.

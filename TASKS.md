@@ -81,6 +81,15 @@
 - [x] Сохранены поиск по имени/email/телефону, Skeleton, Error State, Empty State, Retry, обновление по `isFetching` и демо-диалог Add/Edit.
 - [x] Локальная проверка `npx eslint src/pages/Contacts/ContactsPage.tsx` и target `tsc` для Contacts прошли; `npx vite build` прошёл.
 - [x] Полные `npm run lint`, `npm run typecheck` и `npm run build` заблокированы незакоммиченными посторонними файлами (`contactsSlice.ts`, `LoginPage.tsx`, `RegisterPage.tsx`), не изменёнными в этом этапе.
+- [x] Изучены `AppShell`, `SidebarNavigation`, `PublicHeader`, `ThemeSwitcher`, auth slice/api/types, `baseApi`, `AuthInitializer`, `ProtectedRoute`, `userApi` и `main.tsx`; новая архитектура не добавлялась.
+- [x] В `AppShell` сразу после ThemeSwitcher добавлен `ProfileMenu` с аватаром, именем из `state.auth.user`, стрелкой, hover/focus и компактным mobile-видом.
+- [x] Dropdown на существующем shadcn/ui `DropdownMenu` показывает аватар, настоящее имя, email, разделитель, «Мой профиль» (`UserRound`) и «Выйти из аккаунта» (`LogOut`, destructive variant).
+- [x] Добавлен маршрут `/profile` внутри `ProtectedRoute`; страница получает данные через `useGetMeQuery`, показывает Skeleton, Error State/Retry, имя, email, дату регистрации и аватар с первой буквой.
+- [x] В `authApi` добавлена logout mutation `POST /api/auth/logout` с `LogoutRequest`; при logout refreshToken берётся из localStorage, удаляется при любом исходе, вызываются `clearCredentials()` и `baseApi.util.resetApiState()`, затем выполняется переход на `/login`.
+- [x] Повторные нажатия Logout блокируются через `isBusy`; при ошибке backend показывается toast без утверждения, что токен отозван на сервере.
+- [x] В `main.tsx` подключён `Toaster` из уже установленного sonner; ThemeSwitcher не изменялся.
+- [x] Targeted ESLint, targeted TypeScript и `npx vite build` для профиля/логаута прошли; dev-сервер отдал `HTTP 200` для `/profile` и `/login`.
+- [x] По прямому решению владельца посторонние незакоммиченные файлы с ошибками проверок не изменялись; полные lint/typecheck/build остаются заблокированными.
 
 ## In Progress
 
@@ -97,6 +106,8 @@
 - [ ] Заменить демо-диалоги и заглушки фильтров на реальные сценарии после изучения backend.
 - [ ] Проверить визуальное соответствие PNG-макетам в окружении с поддержкой просмотра изображений.
 - [ ] Провести браузерную проверку адаптивности, навигации и консоли, если станет доступен браузер.
+- [ ] Вручную проверить dropdown по Escape/outside click и фокусу клавиатуры с реальной сессией.
+- [ ] Вручную проверить logout с валидным refreshToken, повторный login и восстановление сессии после перезагрузки.
 - [ ] Оптимизировать размер JS-чанка (Recharts/страницы) при необходимости.
 - [ ] Настроить тесты, если будет принято решение о тестовом фреймворке.
 

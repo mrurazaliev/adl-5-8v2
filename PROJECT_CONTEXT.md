@@ -5,7 +5,7 @@
 ## 1. Текущий статус
 
 Проект находится на этапе **визуального UI-каркаса публичной части и внутреннего Dashboard**. Реализованы публичная главная `/`, страницы входа `/login` и регистрации `/register`, а также внутренний layout с маршрутом `/dashboard` и сохранёнными маршрутами `/debts`, `/contacts`, `/folders`, `/payments`, `/users`, `/archive` на демонстрационных данных из `src/mocks/mockData.ts`.
-Dashboard приведён к трём карточкам, блоку «Финансовая статистика» и «Последние платежи», а также плавающей кнопке создания долга с демо-диалогами. Из таблицы долгов удалена колонка «Статус» при сохранении поля `status` в данных и фильтрах. Публичные страницы используют отдельные `PublicLayout`, `PublicHeader` и `AuthLayout` без Sidebar; язык и тема работают через существующие i18next и `uiSlice`. CRUD, бизнес-логика, реальные API-запросы, авторизация, регистрация и сохранение данных **не реализованы**.
+Dashboard приведён к трём карточкам, блоку «Финансовая статистика» и «Последние платежи», а также плавающей кнопке создания долга с демо-диалогами. Из таблицы долгов удалена колонка «Статус» при сохранении поля `status` в данных и фильтрах. Публичные страницы используют отдельные `PublicLayout`, `PublicHeader` и `AuthLayout` без Sidebar; язык и тема работают через существующие i18next и `uiSlice`. Реальные запросы подключены для login/register/refresh/logout, `GET /api/users/me`, contacts и dashboard summary; refreshToken хранится в localStorage, accessToken — в Redux. Внутренние маршруты защищены, добавлены меню пользователя и страница `/profile`. CRUD и финансовые расчёты **не реализованы**.
 
 Git-репозиторий инициализирован в корне проекта. Состояние перед этим этапом: `dc17a2b7fed2866a2fc4c770afbce032f38220f5` (`feat: add premium fintech landing and auth pages`). Изменения левой панели auth фиксируются отдельным коммитом `refactor: redesign auth left panel`. Push не выполнялся.
 
@@ -54,15 +54,22 @@ src/
   assets/
   components/
     ui/          # сгенерировано shadcn CLI
-    layout/      # AppShell, SidebarNavigation, PublicLayout, PublicHeader, AuthLayout
-    shared/      # PageHeader, StatCard, StatusBadge, FilterBar, DemoActionDialog, EmptyState, DebtActionFab
-  features/
-    auth/
-      authApi.ts
-      authType.ts
-      authSlice.tsx
-    ui/
-      uiSlice.ts
+     layout/      # AppShell, SidebarNavigation, PublicLayout, PublicHeader, AuthLayout, ProfileMenu
+     shared/      # PageHeader, StatCard, StatusBadge, FilterBar, DemoActionDialog, EmptyState, DebtActionFab, AuthInitializer, ProtectedRoute
+   features/
+     auth/
+       authApi.ts
+       authType.ts
+       authSlice.ts
+       registrSchema.tsx
+       userApi.ts
+     contacts/
+       contactsApi.ts
+     dashboard/
+       dashboardApi.ts
+     ui/
+       uiSlice.ts
+
   hooks/
   i18n/
     index.ts
@@ -78,6 +85,7 @@ src/
     Contacts/ContactsPage.tsx
     Folders/FoldersPage.tsx
     Payments/PaymentsPage.tsx
+    Profile/ProfilePage.tsx
     Public/LandingPage.tsx
     Users/UsersPage.tsx
     Archive/ArchivePage.tsx
@@ -103,8 +111,9 @@ src/
 - `/` → `PublicLayout` + `LandingPage` (index)
 - `/login` → `PublicLayout` + `AuthLayout` + `LoginPage`
 - `/register` → `PublicLayout` + `AuthLayout` + `RegisterPage`
-- `/dashboard` → `App` (`AppShell`) + `DashboardPage`
-- `/debts` → `DebtsPage`
+- `/dashboard` → `ProtectedRoute` → `App` (`AppShell`) + `DashboardPage`
+- `/profile` → `ProtectedRoute` → `App` + `ProfilePage`
+- `/debts` → `ProtectedRoute` + `DebtsPage`
 - `/contacts` → `ContactsPage`
 - `/folders` → `FoldersPage`
 - `/payments` → `PaymentsPage`
@@ -112,7 +121,7 @@ src/
 - `/archive` → `ArchivePage`
 - `*` → `Navigate to="/"`
 
-`PublicLayout` отображает `PublicHeader` без Sidebar и используется для публичных и auth-страниц. `AuthLayout` добавляет двухколоночную композицию: слева тёмная минималистичная панель `#111820` с radial-gradient свечениями и текстом, справа — правый блок с формой через `Outlet`. Панель скрыта на мобильных экранах. `src/App.tsx` остался тонкой обёрткой над `AppShell`; внутренние пути разделов сохранены, в `SidebarNavigation` изменён только путь Dashboard на `/dashboard`. Язык и тема на публичных страницах переключаются через те же `i18next` и `uiSlice`.
+`PublicLayout` отображает `PublicHeader` без Sidebar и используется для публичных и auth-страниц. `AuthLayout` добавляет двухколоночную композицию: слева тёмная минималистичная панель `#111820` с radial-gradient свечениями и текстом, справа — правый блок с формой через `Outlet`. Панель скрыта на мобильных экранах. `src/App.tsx` остался тонкой обёрткой над `AppShell`; внутренние пути разделов сохранены, в `SidebarNavigation` изменён только путь Dashboard на `/dashboard`. Язык и тема на публичных страницах переключаются через те же `i18next` и `uiSlice`. Защита внутренних маршрутов реализована компонентом `ProtectedRoute` из файла `src/components/shared/ProtextedRotues.tsx` (сохранённое имя файла); `AuthInitializer` восстанавливает сессию один раз при монтировании приложения. В `AppShell` меню пользователя стоит сразу после ThemeSwitcher; `Toaster` из sonner подключён один раз в `main.tsx`.
 
 ## 7. Redux Architecture
 
@@ -135,19 +144,23 @@ src/
 - Начальные значения: `theme: 'light'`, `sidebarOpen: false`.
 - В `AppShell` тема применяется классом `.dark` на `document.documentElement`.
 
+`src/features/auth/authSlice.ts` хранит только клиентское состояние авторизации: `user`, `accessToken` и `status` (`checking`, `authenticated`, `unauthenticated`). Actions: `setCredentials`, `setAccessToken`, `setChecking`, `clearCredentials`. RefreshToken хранится в localStorage, но не в Redux. При logout вызываются `clearCredentials()` и `baseApi.util.resetApiState()`.
+
 Серверные данные не хранятся в обычных Redux slice.
 
 ## 8. RTK Query Architecture
 
 `src/api/baseApi.ts`:
 
-- `createApi({ reducerPath: 'api', baseQuery: fetchBaseQuery({ baseUrl: import.meta.env.VITE_API_BASE_URL }), endpoints: () => ({}) })`.
-- `src/features/auth/authApi.ts` добавляет через `injectEndpoints` мутацию `login`: `POST /api/auth/login` с типами `LoginRequest`/`LoginResponse` из `authType.ts`.
+- `createApi({ reducerPath: 'api', baseQuery: fetchBaseQuery({ baseUrl: import.meta.env.VITE_API_BASE_URL, prepareHeaders: Authorization: Bearer <accessToken> }), endpoints: () => ({}) })`.
+- `src/features/auth/authApi.ts` добавляет через `injectEndpoints` мутации `login`, `register`, `refresh` и `logout`; logout отправляет `POST /api/auth/logout` с типом `LogoutRequest` (`refreshToken`).
+- `src/features/auth/userApi.ts` добавляет query `getMe`: `GET /api/users/me`, тип `AuthUser`.
 - `src/features/contacts/contactsApi.ts` добавляет query `getContacts`: `GET /api/contacts`, тип `Contact` совпадает со структурой из задания/Swagger.
-- `authSlice.tsx` — неиспользуемый placeholder, в store не подключён; JWT storage, refresh и protected routes не реализованы.
+- `src/features/dashboard/dashboardApi.ts` добавляет query `getDashboardSummary`: `GET /api/dashboard/summary`.
+- `authSlice.ts` подключён к store; `authSlice.tsx` как placeholder удалён из рабочего дерева.
 - `tagTypes` не определены, пока не известны реальные ресурсы backend.
-- Base API подключён к store; новая логика должна добавляться через `baseApi.injectEndpoints`.
-- loading/error и состояние отправки login обеспечиваются RTK Query.
+- Base API подключён к store; новая логика добавляется через `baseApi.injectEndpoints`.
+- loading/error и состояние отправки mutations/queries обеспечиваются RTK Query.
 
 ## 9. i18n
 
@@ -177,8 +190,10 @@ src/
 
 - backend запущен локально на `http://localhost:4000`; `GET /health` возвращает `{"status":"ok"}`.
 - Контракт login задан владельцем: `POST /api/auth/login`, payload `{ email, password }`, ответ `{ user, accessToken, refreshToken }`. Реальный POST с тестовыми несуществующими данными вернул `401`, что подтверждает наличие маршрута.
+- Контракт logout задан владельцем: `POST /api/auth/logout`, payload `{ refreshToken }`; `OPTIONS` на этот путь вернул `204`. Реальный logout с валидным токеном не выполнялся.
+- Контракт пользователя задан владельцем: `GET /api/users/me`; запрос без токена вернул `401`, маршрут существует. Реальные данные без учётных данных не проверялись.
 - Контракт contacts задан владельцем: `GET /api/contacts`; `Contact` содержит `id`, `user_id`, `folder_id`, `name`, `phone`, `email`, `note`, `created_at`, `updated_at`. Запрос без токена вернул `401`, маршрут существует; реальные данные без учётных данных не проверялись.
-- Исходники backend и контракты остальных ресурсов в этом репозитории недоступны; механизм хранения токенов не изучался.
+- Исходники backend и контракты остальных ресурсов в этом репозитории недоступны; контракт `PATCH /api/users/me` не проверен, поэтому редактирование профиля не добавлялось.
 - Нельзя придумывать URL для debts, contacts, folders, payments, users, archive и других ресурсов.
 - Не создавать mock backend, базу данных или фейковые хуки. Временные UI-данные для визуального каркаса допустимы только в `src/mocks/mockData.ts` и не должны выдаваться за данные backend.
 - Не изменять backend.
@@ -217,6 +232,13 @@ src/
 28. `ContactsPage` получает контакты только через `useGetContactsQuery`; моковые данные на странице полностью убраны, пустой ответ backend не подменяется моками.
 29. В `ContactsPage` удалены дублирующийся импорт хука и внутренние Loading/Error/Empty блоки внутри карточек; кнопка обновления использует `isFetching`.
 30. Незакоммиченные посторонние файлы (`baseApi.ts`, `store.ts`, `main.tsx`, auth/register/protected route, `contactsSlice.ts`) в этом этапе не изменялись; полные проверки проекта заблокированы ошибками в части из них.
+31. Profile Menu размещён только в защищённом `AppShell` сразу после ThemeSwitcher; публичный `PublicHeader` не изменён, чтобы не показывать logout неавторизованным пользователям.
+32. Имя в кнопке берётся из `state.auth.user`; до загрузки показывается нейтральный fallback `Пользователь` и буква `?`, моковые данные не используются.
+33. Dropdown построен на существующем shadcn/ui `DropdownMenu`; Radix обеспечивает закрытие по Escape и outside click, а `variant="destructive"` даёт красный logout.
+34. Logout добавлен как RTK Query mutation `POST /api/auth/logout`; при отсутствии refreshToken запрос не отправляется.
+35. При любом исходе logout локальная сессия завершается: refreshToken удаляется, вызываются `clearCredentials()` и `baseApi.util.resetApiState()`, пользователь перенаправляется на `/login`. При ошибке сервера показывается toast, который не утверждает, что токен отозван.
+36. Страница `/profile` получает данные только через `GET /api/users/me`; редактирование имени не добавлено без проверенного контракта `PATCH /api/users/me`.
+37. Полные `npm run lint`, `npm run typecheck` и `npm run build` остаются заблокированными посторонними незакоммиченными файлами по явному решению владельца; для нового кода выполнены targeted ESLint/targeted TypeScript и `npx vite build`.
 
 ## 13. Статус проверок
 
@@ -239,6 +261,15 @@ src/
 - Target `npx tsc` для Contacts и `npx vite build` — успешно.
 - `npm run lint`, `npm run typecheck`, `npm run build` — заблокированы незакоммиченными посторонними файлами: синтаксис в `contactsSlice.ts` и неиспользуемые переменные в `LoginPage.tsx`/`RegisterPage.tsx`.
 - `GET http://localhost:4000/api/contacts` без токена — `HTTP 401`; реальные контакты не запрашивались.
+
+Проверки этапа Profile/Logout:
+
+- Targeted ESLint для `ProfileMenu.tsx`, `ProfilePage.tsx`, `AppShell.tsx` и `main.tsx` — успешно.
+- Targeted TypeScript для auth/profile/layout файлов — успешно; `npx vite build` — успешно.
+- Dev-сервер на `127.0.0.1:4192` отдал `HTTP 200` для `/profile` и `/login`.
+- `OPTIONS http://localhost:4000/api/auth/logout` — `HTTP 204`; `GET http://localhost:4000/api/users/me` без токена — `HTTP 401`; `GET /health` — `HTTP 200`.
+- Полные `npm run lint`, `npm run typecheck`, `npm run build` по-прежнему блокируются незакоммиченными `contactsSlice.ts`, `LoginPage.tsx`, `RegisterPage.tsx` и `authApi.ts`; посторонние файлы не изменялись по решению владельца.
+- Браузерная проверка dropdown, клавиатуры, повторного логина и восстановления сессии после перезагрузки требует ручного тестирования с реальными учётными данными.
 
 ## 14. Команды
 

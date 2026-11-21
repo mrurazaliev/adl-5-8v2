@@ -3,6 +3,7 @@ import { Outlet } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Menu, Moon, Sparkles, Sun } from 'lucide-react'
 import { useAppDispatch, useAppSelector } from '@/app/hooks'
+import { ProfileMenu } from '@/components/layout/ProfileMenu'
 import { SidebarNavigation } from '@/components/layout/SidebarNavigation'
 import { Button } from '@/components/ui/button'
 import {
@@ -110,6 +111,8 @@ export function AppShell() {
           >
             {theme === 'dark' ? <Sun /> : <Moon />}
           </Button>
+
+          <ProfileMenu />
         </header>
 
         <main className="mx-auto w-full max-w-[1600px] p-4 sm:p-6 lg:p-8">
