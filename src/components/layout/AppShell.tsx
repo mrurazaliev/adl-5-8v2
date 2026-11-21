@@ -51,9 +51,6 @@ export function AppShell() {
         <div className="flex-1 overflow-y-auto p-3">
           <SidebarNavigation onNavigate={closeSidebar} />
         </div>
-        <div className="border-t border-sidebar-border p-4 text-xs text-muted-foreground">
-          {t('demoMode')}
-        </div>
       </aside>
 
       <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>

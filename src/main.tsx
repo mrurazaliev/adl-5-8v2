@@ -20,10 +20,8 @@ import ContactsPage from '@/pages/Contacts/ContactsPage'
 import DashboardPage from '@/pages/Dashboard/DashboardPage'
 import DebtsPage from '@/pages/Debts/DebtsPage'
 import FoldersPage from '@/pages/Folders/FoldersPage'
-import PaymentsPage from '@/pages/Payments/PaymentsPage'
 import ProfilePage from '@/pages/Profile/ProfilePage'
 import LandingPage from '@/pages/Public/LandingPage'
-import UsersPage from '@/pages/Users/UsersPage'
 import ProtectedRoute from './components/shared/ProtextedRotues'
 
 createRoot(document.getElementById('root')!).render(
@@ -50,8 +48,6 @@ createRoot(document.getElementById('root')!).render(
                 <Route path="debts" element={<DebtsPage />} />
                 <Route path="contacts" element={<ContactsPage />} />
                 <Route path="folders" element={<FoldersPage />} />
-                <Route path="payments" element={<PaymentsPage />} />
-                <Route path="users" element={<UsersPage />} />
                 <Route path="archive" element={<ArchivePage />} />
               </Route>
             </Route>

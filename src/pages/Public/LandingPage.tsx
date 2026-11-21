@@ -93,7 +93,6 @@ export default function LandingPage() {
             </Button>
           </div>
 
-          <p className="mt-6 text-xs text-muted-foreground">{t('demoMode')}</p>
         </div>
       </section>
 
@@ -142,7 +141,6 @@ export default function LandingPage() {
             </span>
             <div>
               <p className="text-sm font-semibold">{t('appTitle')}</p>
-              <p className="text-xs text-muted-foreground">{t('demoMode')}</p>
             </div>
           </div>
           <div className="flex items-center gap-5 text-sm">

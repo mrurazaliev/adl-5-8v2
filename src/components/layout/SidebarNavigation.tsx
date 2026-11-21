@@ -5,8 +5,7 @@ import {
   CreditCard,
   Folder,
   LayoutDashboard,
-  Receipt,
-  ShieldCheck,
+  UserRound,
   Users,
   type LucideIcon,
 } from 'lucide-react'
@@ -23,9 +22,8 @@ const items: NavigationItem[] = [
   { to: '/debts', labelKey: 'nav.debts', icon: CreditCard },
   { to: '/contacts', labelKey: 'nav.contacts', icon: Users },
   { to: '/folders', labelKey: 'nav.folders', icon: Folder },
-  { to: '/payments', labelKey: 'nav.payments', icon: Receipt },
-  { to: '/users', labelKey: 'nav.users', icon: ShieldCheck },
   { to: '/archive', labelKey: 'nav.archive', icon: Archive },
+  { to: '/profile', labelKey: 'pages.profile.title', icon: UserRound },
 ]
 
 interface SidebarNavigationProps {
