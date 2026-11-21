@@ -3,11 +3,12 @@ import { useState } from 'react'
 import { Controller, useForm, type SubmitHandler } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useTranslation } from 'react-i18next'
-import { Eye, Pencil, Plus, RefreshCw, Trash2 } from 'lucide-react'
+import { Eye, Pencil, Plus, Trash2 } from 'lucide-react'
+import { CreateDebtDialog } from '@/features/debts/CreateDebtDialog'
 import { toast } from 'sonner'
 import { useGetContactsQuery } from '@/features/contacts/contactsApi'
 import {
-  useGetDebtsQuery, useGetDebtByIdQuery, useAddDebtMutation,
+  useGetDebtsQuery, useGetDebtByIdQuery,
   useUpdateDebtMutation, useDeleteDebtMutation,
   type Debt, type DebtFilters,
 } from '@/features/debts/debtsApi'
@@ -27,6 +28,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 export default function DebtsPage() {
   const { t } = useTranslation()
   const [open, setOpen] = useState(false)
+  const [createOpen, setCreateOpen] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [dateRequired, setDateRequired] = useState(false)
   const [deletingDebt, setDeletingDebt] = useState<Debt | null>(null)
@@ -42,7 +44,6 @@ export default function DebtsPage() {
     currentData: viewedDebt, isFetching: detailsLoading, isError: detailsError,
     refetch: refetchDetails,
   } = useGetDebtByIdQuery(viewingId ?? '', { skip: viewingId === null })
-  const [addDebt, { isLoading: isAdding }] = useAddDebtMutation()
   const [updateDebt, { isLoading: isUpdating }] = useUpdateDebtMutation()
   const [deleteDebt, { isLoading: isDeleting }] = useDeleteDebtMutation()
   const schema = createDebtSchema(t, dateRequired)
@@ -61,7 +62,7 @@ export default function DebtsPage() {
       currency: 'USD', description: '', due_date: '',
     },
   })
-  const isSaving = isSubmitting || isAdding || isUpdating
+  const isSaving = isSubmitting || isUpdating
   const contactsUnavailable = contactsLoading || contactsError || contacts.length === 0
   const hasFilters = Boolean(filters.direction || filters.status || filters.contact_id)
 
@@ -71,10 +72,7 @@ export default function DebtsPage() {
   }
 
   function handleOpenAdd() {
-    setEditingId(null)
-    setDateRequired(false)
-    reset()
-    setOpen(true)
+    setCreateOpen(true)
   }
 
   function handleOpenEdit(debt: Debt) {
@@ -91,16 +89,11 @@ export default function DebtsPage() {
   }
 
   const onSubmit: SubmitHandler<DebtFormValues> = async (data) => {
-    if (isAdding || isUpdating || contactsUnavailable) return
+    if (isUpdating || contactsUnavailable || editingId === null) return
     const payload = { ...data, due_date: data.due_date || undefined }
     try {
-      if (editingId !== null) {
-        await updateDebt({ id: editingId, ...payload }).unwrap()
-        toast.success(t('pages.debts.messages.updated'))
-      } else {
-        await addDebt(payload).unwrap()
-        toast.success(t('pages.debts.messages.created'))
-      }
+      await updateDebt({ id: editingId, ...payload }).unwrap()
+      toast.success(t('pages.debts.messages.updated'))
       setOpen(false)
       setEditingId(null)
       reset()
@@ -123,22 +116,19 @@ export default function DebtsPage() {
   return (
     <div className="space-y-6">
       <PageHeader title={t('pages.debts.title')} description={t('pages.debts.subtitle')}
-        actions={<Button onClick={handleOpenAdd} disabled={contactsUnavailable}><Plus />{t('common.add')}</Button>} />
+        actions={<Button onClick={handleOpenAdd}><Plus />{t('common.add')}</Button>} />
 
       {contactsLoading && <p role="status" className="text-sm text-muted-foreground">{t('pages.debts.contactsLoading')}</p>}
       {contactsError && <div role="alert" className="flex flex-wrap items-center gap-3 text-sm text-destructive">
-        {t('pages.debts.contactsError')}
+        {t('pages.debts.creation.contactsError')}
         <Button variant="outline" onClick={() => void refetchContacts()}>{t('pages.debts.retry')}</Button>
       </div>}
       {!contactsLoading && !contactsError && contacts.length === 0 &&
-        <p className="text-sm text-muted-foreground">{t('pages.debts.noContacts')}</p>}
+        <p className="text-sm text-muted-foreground">{t('pages.debts.creation.noContacts')}</p>}
 
       <Card className="border-border/70 shadow-sm">
         <CardHeader className="flex flex-row items-center justify-between gap-3">
           <CardTitle>{t('pages.debts.title')}</CardTitle>
-          <Button variant="outline" disabled={isFetching} onClick={() => void refetch()}>
-            <RefreshCw className={isFetching ? 'animate-spin' : ''} />{t('pages.debts.refresh')}
-          </Button>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
@@ -167,7 +157,7 @@ export default function DebtsPage() {
             <Button variant="outline" disabled={!hasFilters} onClick={() => setFilters({})}>{t('pages.debts.resetFilters')}</Button>
           </div>
 
-          {isFetching && debts.length === 0 && <div role="status" aria-label={t('pages.debts.refresh')} className="space-y-3">
+          {isFetching && debts.length === 0 && <div role="status" aria-label={t('pages.debts.loading')} className="space-y-3">
             {[1, 2, 3].map((id) => <Skeleton key={id} className="h-14 w-full" />)}
           </div>}
           {isError && <div role="alert" className="space-y-3 py-8 text-center">
@@ -205,6 +195,8 @@ export default function DebtsPage() {
           </div>}
         </CardContent>
       </Card>
+
+      <CreateDebtDialog open={createOpen} onOpenChange={setCreateOpen} />
 
       <Dialog open={open} onOpenChange={(value) => { if (!isSaving) setOpen(value) }}>
         <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-lg">

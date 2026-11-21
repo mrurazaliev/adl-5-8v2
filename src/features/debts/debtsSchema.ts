@@ -23,3 +23,16 @@ export function createDebtSchema(t: Translate, dateRequired = false) {
 }
 
 export type DebtFormValues = z.infer<ReturnType<typeof createDebtSchema>>
+
+export function createNewDebtSchema(t: Translate) {
+  return createDebtSchema(t).extend({
+    contact_id: z.union([z.uuid(t('pages.debts.validation.contact')), z.literal('')]),
+    contact_name: z.string().trim().min(1, t('pages.debts.creation.nameRequired'))
+      .max(120, t('pages.debts.creation.nameMax')),
+    create_contact: z.boolean(),
+  }).refine((data) => data.contact_id !== '' || data.create_contact, {
+    path: ['contact_name'], message: t('pages.debts.creation.choosePerson'),
+  })
+}
+
+export type NewDebtFormValues = z.infer<ReturnType<typeof createNewDebtSchema>>

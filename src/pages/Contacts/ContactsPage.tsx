@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useTranslation } from 'react-i18next'
 import { useForm } from 'react-hook-form'
-import { Mail, Pencil, Phone, Plus, RefreshCw, Trash2 } from 'lucide-react'
+import { Mail, Pencil, Phone, Plus, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 
 import {
@@ -189,17 +189,6 @@ export default function ContactsPage() {
           className="h-10 min-w-0 flex-1"
         />
 
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() => void refetch()}
-          disabled={isFetching}
-        >
-          <RefreshCw
-            className={`size-4 ${isFetching ? 'animate-spin' : ''}`}
-          />
-          {t('pages.contacts.refresh')}
-        </Button>
       </div>
 
       {isLoading && (
@@ -228,6 +217,7 @@ export default function ContactsPage() {
               type="button"
               variant="outline"
               onClick={() => void refetch()}
+              disabled={isFetching}
             >
               {t('pages.contacts.retry')}
             </Button>

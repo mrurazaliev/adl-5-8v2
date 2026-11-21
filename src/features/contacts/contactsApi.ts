@@ -19,49 +19,37 @@ export interface ContactPayload {
   note?: string | null
 }
 
-export interface UpdateContactArgs extends ContactPayload {
-  id: string
-}
-
-const contactListTag = { type: 'Contact' as const, id: 'LIST' }
-
 export const contactsApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
+
     getContacts: builder.query<Contact[], void>({
       query: () => '/api/contacts',
-      providesTags: (result) =>
-        result
-          ? [
-              ...result.map(({ id }) => ({ type: 'Contact' as const, id })),
-              contactListTag,
-            ]
-          : [contactListTag],
+      providesTags: ['Contact'],
     }),
 
     getContact: builder.query<Contact, string>({
       query: (id) => `/api/contacts/${id}`,
-      providesTags: (_, __, id) => [{ type: 'Contact' as const, id }],
+      providesTags: ['Contact'],
     }),
 
     createContact: builder.mutation<Contact, ContactPayload>({
-      query: (body) => ({
+      query: (newContact) => ({
         url: '/api/contacts',
         method: 'POST',
-        body,
+        body: newContact,
       }),
-      invalidatesTags: [contactListTag],
+      invalidatesTags: ['Contact', 'Dashboard'],
     }),
 
-    updateContact: builder.mutation<Contact, UpdateContactArgs>({
-      query: ({ id, ...body }) => ({
+    updateContact: builder.mutation<
+      Contact,
+      Partial<ContactPayload> & { id: string }>({
+      query: ({ id, ...updatedData }) => ({
         url: `/api/contacts/${id}`,
         method: 'PATCH',
-        body,
+        body: updatedData,
       }),
-      invalidatesTags: (_, __, { id }) => [
-        { type: 'Contact' as const, id },
-        contactListTag,
-      ],
+      invalidatesTags: ['Contact', 'Dashboard'],
     }),
 
     deleteContact: builder.mutation<void, string>({
@@ -69,11 +57,9 @@ export const contactsApi = baseApi.injectEndpoints({
         url: `/api/contacts/${id}`,
         method: 'DELETE',
       }),
-      invalidatesTags: (_, __, id) => [
-        { type: 'Contact' as const, id },
-        contactListTag,
-      ],
+      invalidatesTags: ['Contact', 'Dashboard'],
     }),
+
   }),
 })
 

@@ -2,7 +2,7 @@
 import { useForm, type SubmitHandler } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useTranslation } from 'react-i18next'
-import { History, RefreshCw } from 'lucide-react'
+import { History } from 'lucide-react'
 import { toast } from 'sonner'
 import type { Debt } from '@/features/debts/debtsApi'
 import { useGetPaymentsQuery, useAddPaymentMutation } from '@/features/payments/paymentsApi'
@@ -80,16 +80,6 @@ export function DebtPayments({ debt, disabled, onSavingChange }: DebtPaymentsPro
         <Card className="min-w-0 border-border/70 shadow-sm">
           <CardHeader className="flex flex-row items-center justify-between gap-3">
             <CardTitle>{t('pages.payments.history')}</CardTitle>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon-sm"
-              aria-label={t('pages.payments.refresh')}
-              disabled={isFetching || isSaving}
-              onClick={() => void refetch()}
-            >
-              <RefreshCw className={isFetching ? 'animate-spin' : ''} />
-            </Button>
           </CardHeader>
           <CardContent className="space-y-3">
             {isFetching && payments.length === 0 && <div role="status" aria-label={t('pages.payments.loading')} className="space-y-2">

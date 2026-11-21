@@ -9,7 +9,7 @@
     retry: 'Повторить', empty: 'По этому долгу пока нет платежей.',
     loadError: 'Не удалось загрузить платежи.', chooseDebt: 'Выбрать долг',
     selectDebtHint: 'Выберите долг, откройте его просмотр и нажмите «История платежей». Там можно добавить платёж.',
-    messages: { created: 'Платёж добавлен.', saveError: 'Не удалось сохранить платёж. Данные формы сохранены. Перед повторной отправкой обновите историю и проверьте, не был ли платёж уже создан.' },
+    messages: { created: 'Платёж добавлен.', saveError: 'Не удалось сохранить платёж. Данные формы сохранены. Перед повторной отправкой проверьте в истории, не был ли платёж уже создан.' },
     validation: { amount: 'Введите число больше 0 и не больше 1 000 000 000.', note: 'Примечание — не более 500 символов.', date: 'Введите действительные дату и время.' },
   },
   tj: {
@@ -22,7 +22,7 @@
     retry: 'Такрор', empty: 'Барои ин қарз ҳоло пардохт нест.',
     loadError: 'Пардохтҳо бор нашуданд.', chooseDebt: 'Интихоби қарз',
     selectDebtHint: 'Қарзро интихоб карда, маълумоти онро кушоед ва «Таърихи пардохтҳо»-ро пахш кунед. Дар он ҷо пардохт илова мешавад.',
-    messages: { created: 'Пардохт илова шуд.', saveError: 'Пардохт захира нашуд. Маълумоти шакл нигоҳ дошта шуд. Пеш аз такрор таърихро нав карда, санҷед, ки пардохт аллакай сохта нашудааст.' },
+    messages: { created: 'Пардохт илова шуд.', saveError: 'Пардохт захира нашуд. Маълумоти шакл нигоҳ дошта шуд. Пеш аз такрор дар таърих санҷед, ки пардохт аллакай сохта нашудааст.' },
     validation: { amount: 'Рақами аз 0 калон ва на бештар аз 1 000 000 000 ворид кунед.', note: 'Эзоҳ набояд аз 500 аломат зиёд бошад.', date: 'Сана ва вақти дурустро ворид кунед.' },
   },
   en: {
@@ -35,7 +35,7 @@
     retry: 'Retry', empty: 'No payments for this debt yet.',
     loadError: 'Could not load payments.', chooseDebt: 'Choose a debt',
     selectDebtHint: 'Choose a debt, open its details and select “Payment history” to view or add payments.',
-    messages: { created: 'Payment added.', saveError: 'Could not save payment. Your input is preserved. Before retrying, refresh the history and check whether the payment was already created.' },
+    messages: { created: 'Payment added.', saveError: 'Could not save payment. Your input is preserved. Before retrying, check the history to see whether the payment was already created.' },
     validation: { amount: 'Enter a number greater than 0 and no greater than 1,000,000,000.', note: 'Note must be 500 characters or fewer.', date: 'Enter a valid date and time.' },
   },
 }

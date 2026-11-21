@@ -1,7 +1,9 @@
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import { isValid, parseISO } from 'date-fns'
-import { ArrowRight, Plus, RefreshCw } from 'lucide-react'
+import { ArrowRight, Plus } from 'lucide-react'
+import { CreateDebtDialog } from '@/features/debts/CreateDebtDialog'
 import { useGetDashboardSummaryQuery } from '@/features/dashboard/dashboardApi'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { PageHeader } from '@/components/shared/PageHeader'
@@ -12,6 +14,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 
 export default function DashboardPage() {
   const { t, i18n } = useTranslation()
+  const [open, setOpen] = useState(false)
   const { data: summary, isLoading, isFetching, isError, refetch } = useGetDashboardSummaryQuery()
   const locale = i18n.language === 'tj' ? 'tg-TJ' : i18n.language
   const statuses = [
@@ -20,6 +23,11 @@ export default function DashboardPage() {
     { status: 'paid', count: summary?.counts?.paid, color: 'bg-success' },
   ]
   const total = summary?.counts?.total
+  const hasChart = total !== undefined && Number.isSafeInteger(total) && total > 0
+    && statuses.every(({ count }) => count !== undefined && Number.isSafeInteger(count) && count >= 0)
+    && statuses.reduce((sum, { count }) => sum + (count ?? 0), 0) === total
+  const pendingEnd = hasChart && summary ? (summary.counts.pending / total * 100) : 0
+  const partialEnd = hasChart && summary ? ((summary.counts.pending + summary.counts.partial) / total * 100) : 0
 
   function formatCount(value: number | undefined) {
     return Number.isSafeInteger(value) && value !== undefined && value >= 0
@@ -44,12 +52,6 @@ export default function DashboardPage() {
       <PageHeader
         title={t('pages.dashboard.title')}
         description={t('pages.dashboard.subtitle')}
-        actions={
-          <Button type="button" variant="outline" disabled={isFetching} onClick={() => void refetch()}>
-            <RefreshCw className={isFetching ? 'animate-spin motion-reduce:animate-none' : ''} />
-            {t(isFetching ? 'pages.dashboard.updating' : 'pages.dashboard.refresh')}
-          </Button>
-        }
       />
 
       {isLoading ? (
@@ -100,6 +102,14 @@ export default function DashboardPage() {
                 <CardDescription>{t('pages.dashboard.distributionHint')}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
+                {hasChart && <figure className="flex justify-center" aria-label={t('pages.dashboard.chartSummary', { pending: summary.counts.pending, partial: summary.counts.partial, paid: summary.counts.paid })}>
+                  <div className="grid size-44 place-items-center rounded-full p-5" style={{ background: `conic-gradient(var(--warning) 0% ${pendingEnd}%, var(--primary) ${pendingEnd}% ${partialEnd}%, var(--success) ${partialEnd}% 100%)` }}>
+                    <div className="flex size-full flex-col items-center justify-center rounded-full bg-card text-center">
+                      <span className="text-3xl font-semibold tabular-nums">{formatCount(total)}</span>
+                      <span className="text-xs text-muted-foreground">{t('pages.dashboard.totalDebts')}</span>
+                    </div>
+                  </div>
+                </figure>}
                 <dl className="grid grid-cols-2 gap-4 border-b border-border pb-6">
                   <div>
                     <dt className="text-sm text-muted-foreground">{t('pages.dashboard.totalDebts')}</dt>
@@ -177,9 +187,10 @@ export default function DashboardPage() {
         </>
       )}
 
-      <Button asChild size="icon-lg" className="fixed right-4 bottom-4 z-40 size-12 rounded-full shadow-xl sm:right-6 sm:bottom-6">
-        <Link to="/debts" aria-label={t('pages.dashboard.manageDebts')}><Plus className="size-5" /></Link>
+      <Button type="button" size="icon-lg" aria-label={t('pages.debts.addTitle')} onClick={() => setOpen(true)} className="fixed right-4 bottom-4 z-40 size-12 rounded-full shadow-xl sm:right-6 sm:bottom-6">
+        <Plus className="size-5" />
       </Button>
+      <CreateDebtDialog open={open} onOpenChange={setOpen} />
     </div>
   )
 }

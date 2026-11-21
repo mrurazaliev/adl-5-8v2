@@ -960,3 +960,32 @@ HEAD перед этапом — 61b89d7 (Payments). Незакоммиченн�
 ### Git и далее
 
 Коммит feat: complete real dashboard включает только DashboardPage, dashboardApi, Dashboard-переводы/их подключение, удаление временного Dashboard tag из main.tsx и три документа контекста. Folder tag в baseApi, чужой заголовок Dashboard и остальные посторонние изменения остаются вне коммита. Backend и конфигурация OpenCode не изменяются. Push не выполняется; Archive и общий Code Review автоматически не начинаются.
+
+## 2026-11-21 — Phase 6.5: Dashboard UX & Debt Creation
+
+### Контекст и контракт
+
+HEAD перед этапом — 34d4731. Прочитаны документы, Dashboard/Debts/Contacts/Folders/Payments, API, схемы, layout, FAB и локализация; исходные затрагиваемые файлы сохранены в node_modules/.tmp/ux-before, их SHA-256 — node_modules/.tmp/ux-preservation.json. Эти артефакты игнорируются Git. Backend прочитан только для сверки: контакт требует name (1–120), прочие поля необязательны; debt требует UUID contact_id, положительную amount <=1e9, currency 1–8, необязательные description <=1000 и due_date YYYY-MM-DD. При создании пустые поля исключаются. При редактировании очистить установленную дату нельзя; прежняя проверка dateRequired сохранена. Backend, БД, авторизация и Refresh Token не изменялись.
+
+### Реализация и обработка сбоев
+
+Добавлен один CreateDebtDialog для Dashboard и Debts. Первый шаг — две карточки с направлениями и иконками, второй — имя человека с локальным поиском, выбором конкретного ID и явной кнопкой нового человека, сумма/валюта и необязательные описание/срок. Совпадение имён не выбирает контакт автоматически; для различения существующих контактов показываются телефон/email при наличии. Кнопка Back сохраняет форму и полученный ID. Одна область DialogContent с max-height и overflow-y-auto; список содержит до пяти совпадений без второго скролла. Во время POST поля, Back/Cancel/Submit и закрытие блокируются. useRef предотвращает повторный запуск submit до rerender; чтение ref происходит только в обработчиках. Использованы RHF/Zod и встроенный useWatch без эффектов и новых зависимостей.
+
+Простая функция createDebtWithContact использует существующие mutations: при наличии ID сразу POST debt; иначе await POST contact {name}, сохранение возвращённого ID через setValue, затем POST debt {contact_id,...}. Ошибка контакта не отправляет долг; ошибка долга сохраняет ID/ввод, не удаляет контакт. Retry в том же процессе использует полученный ID, включая возврат к выбору направления. Изменение имени сбрасывает выбор и требует нового явного выбора/создания. После успеха форма сбрасывается, модалка закрывается, показывается toast. Сетевая потеря ответа остаётся неоднозначной: backend не предоставляет атомарную операцию или idempotency keys; сообщения просят проверить списки перед повтором. Автоматических повторных POST нет.
+
+Обычные Refresh убраны со страниц Dashboard/Debts/Contacts/Folders и истории Payments; Retry в ошибках сохранены. Contacts API приведён к простым Contact/Dashboard tags для автоматического обновления списка контактов и summary, в том числе когда контакт создан, а долг — нет. Прежние Debt/Dashboard и Payment/Debt/Dashboard invalidation сохранены. Ручных refetch после mutations и polling нет. На Dashboard добавлен лёгкий donut через conic-gradient CSS-токенов и реальные counts; числовая легенда/полосы сохранены. При нуле, недостающих или противоречивых counts donut не рисуется. Финансовые агрегаты без валюты не отображаются и не пересчитываются. RU/TJ/EN добавлены в debtCreation.ts и подключены через debts.ts; Payment-сообщения больше не предлагают удалённую кнопку Refresh.
+
+### Проверки и ограничения
+
+- Целевые npx.cmd tsc -p node_modules/.tmp/tsconfig.ux.json --noEmit --incremental false и ESLint всех новых/изменённых исходников задачи — успешно, без новых ошибок/предупреждений.
+- node node_modules/.tmp/ux-check.cjs — успешно: Zod, существующий/новый контакт и одинаковые имена, оба направления, ожидание ответа контакта, остановка после ошибки контакта, сохранение ID до POST debt, Retry без повторного POST contact, omission пустых полей, корректные payloads, Authorization, фактический refetch Contact/Debt/Dashboard через реальные RTK Query endpoints с изолированным транспортом.
+- node node_modules/.tmp/dashboard-check.cjs — SSR настоящего Dashboard RU/TJ/EN, loading/error/empty/partial-data, углы donut, отсутствие donut для нуля, скрытые денежные агрегаты, refetch после CRUD/Payments и 401/retry — успешно.
+- node .git/debts-check.cjs и node node_modules/.tmp/payments-review.cjs — регрессии успешны, включая прежние схемы и защиту даты в PATCH.
+- npx.cmd tsc -b --noEmit, npm.cmd run typecheck, npm.cmd run build — прежние 8 TS ошибок: authApi/body; LoginPage/setSuccessMessage и AuthTests/authTests casing; RegisterPage/setServerError и отсутствующий response; ContactsPage/Controller/Folder/useGetFoldersQuery. Полный build останавливается до Vite. npm.cmd run lint — прежние 6 no-unused-vars ошибок auth/Contacts. Новых ошибок нет.
+- npx.cmd vite build — успешно, 2738 модулей, JS ~876 kB; прежнее предупреждение >500 kB.
+- npm.cmd run dev -- --host 127.0.0.1 --port 4199 --strictPort запущен; /dashboard, /debts, /contacts, /folders, /payments — HTTP 200 (SPA shell). Backend /health — 200, GET summary/contacts без токена — 401. Реальные авторизованные POST не выполнялись, данные БД не менялись. Проверочный dev-сервер остановлен.
+- Browser access host по-прежнему unavailable. Визуальные клики диалога, клавиатура, темы и мобильная прокрутка не подтверждены; тесты транспорта/SSR не заменяют ручной браузерный проход.
+
+### Git и сохранность
+
+Коммит feat: improve dashboard and debt creation UX содержит только общую форму/последовательность создания, схему, интеграцию Dashboard/Debts, donut, переводы, удаление Refresh в Contacts/Payments и теги Contacts. В ContactsPage staging отделён от прежних импортов Controller/Folder/useGetFoldersQuery, в contactsApi — от прежнего folder_id payload. Существующие baseApi Folder tag, contactsSchema, i18n/index title, auth/Register и design assets сохранены вне коммита. Удаление Refresh в рабочем FoldersPage оставлено вместе с прежним незакоммиченным Folders CRUD: включение всего чужого модуля ради одной кнопки не выполняется; в HEAD до задачи Folders ещё был UI-каркасом без Refresh. Исходная копия Folders сохранена. Push не выполняется. Archive не начинается.

@@ -1,11 +1,14 @@
-﻿export const debtsTranslations = {
+import { debtCreationTranslations } from '@/i18n/debtCreation'
+
+export const debtsTranslations = {
   ru: {
+    creation: debtCreationTranslations.ru,
     title: 'Долги', subtitle: 'Долговые записи и обязательства',
     contact: 'Контакт', direction: 'Направление', amount: 'Сумма', currency: 'Валюта',
     description: 'Описание', due_date: 'Срок возврата', actions: 'Действия',
     they_owe_me: 'Мне должны', i_owe_them: 'Я должен',
     pending: 'Ожидает погашения', partial: 'Частично погашен', paid: 'Погашен',
-    refresh: 'Обновить', retry: 'Повторить', loadError: 'Не удалось загрузить долги.',
+    refresh: 'Обновить', loading: 'Загрузка долгов…', retry: 'Повторить', loadError: 'Не удалось загрузить долги.',
     contactsError: 'Не удалось загрузить контакты. Создание и редактирование временно недоступны.',
     contactsLoading: 'Загрузка контактов…', noContacts: 'Сначала добавьте контакт в разделе «Контакты».',
     unknownContact: 'Контакт недоступен ({{id}})', chooseContact: 'Выберите контакт',
@@ -25,12 +28,13 @@
       dateRequired: 'Сервер не поддерживает очистку установленной даты.' },
   },
   tj: {
+    creation: debtCreationTranslations.tj,
     title: 'Қарзҳо', subtitle: 'Сабтҳои қарз ва уҳдадориҳо',
     contact: 'Тамос', direction: 'Самт', amount: 'Маблағ', currency: 'Асъор',
     description: 'Тавсиф', due_date: 'Муҳлати баргардонидан', actions: 'Амалҳо',
     they_owe_me: 'Аз ман қарздоранд', i_owe_them: 'Ман қарздорам',
     pending: 'Дар интизори пардохт', partial: 'Қисман пардохтшуда', paid: 'Пардохтшуда',
-    refresh: 'Навсозӣ', retry: 'Такрор', loadError: 'Боркунии қарзҳо муяссар нашуд.',
+    refresh: 'Навсозӣ', loading: 'Боркунии қарзҳо…', retry: 'Такрор', loadError: 'Боркунии қарзҳо муяссар нашуд.',
     contactsError: 'Тамосҳо бор нашуданд. Сохтан ва таҳрир муваққатан дастнорасанд.',
     contactsLoading: 'Боркунии тамосҳо…', noContacts: 'Аввал дар бахши «Тамосҳо» тамос илова кунед.',
     unknownContact: 'Тамос дастнорас аст ({{id}})', chooseContact: 'Тамосро интихоб кунед',
@@ -50,12 +54,13 @@
       dateRequired: 'Сервер тоза кардани санаи муқарраршударо дастгирӣ намекунад.' },
   },
   en: {
+    creation: debtCreationTranslations.en,
     title: 'Debts', subtitle: 'Debt records and obligations',
     contact: 'Contact', direction: 'Direction', amount: 'Amount', currency: 'Currency',
     description: 'Description', due_date: 'Due date', actions: 'Actions',
     they_owe_me: 'They owe me', i_owe_them: 'I owe them',
     pending: 'Pending', partial: 'Partially paid', paid: 'Paid',
-    refresh: 'Refresh', retry: 'Retry', loadError: 'Could not load debts.',
+    refresh: 'Refresh', loading: 'Loading debts…', retry: 'Retry', loadError: 'Could not load debts.',
     contactsError: 'Could not load contacts. Creating and editing are temporarily unavailable.',
     contactsLoading: 'Loading contacts…', noContacts: 'Add a contact in Contacts first.',
     unknownContact: 'Contact unavailable ({{id}})', chooseContact: 'Choose a contact',
