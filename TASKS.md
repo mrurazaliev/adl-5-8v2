@@ -130,3 +130,13 @@
 - Не начинать Pending-задачи без явной просьбы.
 - Не отмечать задачу Completed без запуска соответствующей проверки.
 - После завершения этапа обновить `DEVELOPMENT_LOG.md` и `PROJECT_CONTEXT.md`.
+
+## Этап 3 — Debts CRUD, 2026-11-21
+
+- [x] Реальные getDebts/getDebtById/addDebt/updateDebt/deleteDebt через baseApi.injectEndpoints, простые Debt/Dashboard tags и backend-фильтры.
+- [x] DebtsPage: RHF/Zod, setValue без useEffect, реальные контакты, просмотр, подтверждение удаления, loading/error/empty/pending, RU/TJ/EN.
+- [x] Сверен контракт backend; статусы/платежи/валютные итоги не вычисляются на frontend; пустые даты не отправляются.
+- [x] Целевые TypeScript/ESLint, изолированные проверки схемы/RTK Query, Vite build и dev-маршруты прошли.
+- [ ] Полные TypeScript/lint/build: устранение прежних ошибок contactsSlice/auth/Contacts — отдельная задача, чужие изменения сохранены.
+- [ ] Проверить авторизованный Debts/Contacts/Folders CRUD и браузерную работу с тестовой сессией. Сейчас защищённые GET возвращают 401 без токена.
+- [ ] Отдельно исправить прежнюю форму Contacts: обязательный folder_id схемы отсутствует в форме.

@@ -858,3 +858,17 @@
 
 - Создать отдельный коммит `feat: implement contacts CRUD with RTK Query` без push.
 - Провести браузерную проверку create/edit/delete и валидации с подготовленными тестовыми данными; реальные mutation-запросы не выполнялись.
+
+## 2026-11-21 — Debts CRUD (этап 3)
+
+DebtsPage переведена с mockData на GET /api/debts с серверными status/direction/contact_id, GET /api/debts/:id, POST, PATCH и DELETE. Формы: React Hook Form (register/setValue/reset/handleSubmit/SubmitHandler), Zod, useState; Select контактов с Controller, реальные контакты из useGetContactsQuery. Есть просмотр, подтверждение удаления, Skeleton, Retry, пустые состояния, pending-кнопки, уведомления и RU/TJ/EN.
+
+Контракт сверен с ../Debt_back/src/modules/debts/{debts.schema,debts.service,debts.controller,debts.routes}.ts и src/docs/openapi.ts (только чтение): сумма >0, <=1e9, currency 1–8 символов, description <=1000, дата YYYY-MM-DD. PostgreSQL numeric может приходить строкой. Пустая дата исключается из JSON; очистка установленной даты сервером не поддерживается и блокируется схемой с пояснением. Статусы и платежи не отправляются; остатки и суммы по разным валютам не рассчитываются. DELETE каскадно удаляет связанные платежи по контракту сервера, это указано в подтверждении.
+
+Добавлены Debt и Dashboard без удаления существующих тегов. В main.tsx через baseApi.enhanceEndpoints зарегистрирован простой Dashboard tag существующего запроса summary после загрузки модулей (с проверкой наличия endpoint): это позволяет не переписывать чужой untracked dashboardApi.ts. Авторизация, Refresh Token, Contacts/Folders и backend не изменялись.
+
+Проверки: целевой TypeScript и ESLint нового кода успешны; изолированные schema/RTK Query проверки успешны; npx vite build успешен (warning о чанке >500 kB); dev-маршруты /debts, /contacts, /folders — HTTP 200. Полные tsc -b --noEmit и npm run build блокируются прежним JSX в contactsSlice.ts. Полный lint содержит 7 прежних ошибок auth/contacts. Живой backend /health — 200, защищённые GET debts/detail/contacts/folders без токена — 401. Авторизованный CRUD и браузерное поведение не проверены без тестовой сессии.
+
+Code Review: нет моковых долгов, смешения валют, ручного статуса, оптимистического удаления или useEffect заполнения формы; id исключается из PATCH body; проверены NaN/Infinity/границы суммы/UUID/календарная дата, соответствие переводов и refetch list/detail/Dashboard. В прежнем Contacts обнаружено несоответствие: обязательный folder_id схемы отсутствует в форме. Оно оставлено владельцу, так как не связано с интеграцией долгов.
+
+Исходные незакоммиченные файлы скопированы в .git/debts-crud-backup-20261121-154009, включая working.patch/index.patch. Коммит долгов содержит только собственные изменения; старые Folder-тег и изменение заголовка Dashboard в i18n остаются вне него. Проверочные скрипты сохранены локально в .git/debts-check.cjs и .git/debts-smoke.cjs; целевой tsconfig — .git/tsconfig.debts.json. Для повторения: node .git/debts-check.cjs; npx tsc -p .git/tsconfig.debts.json --noEmit. Git push не выполнялся.

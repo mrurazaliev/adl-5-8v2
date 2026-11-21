@@ -1,173 +1,286 @@
-import { useState } from 'react'
+﻿import { useState } from 'react'
+import { Controller, useForm, type SubmitHandler } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { useTranslation } from 'react-i18next'
-import { Archive, Pencil, Plus } from 'lucide-react'
-import { DemoActionDialog } from '@/components/shared/DemoActionDialog'
-import { FilterBar } from '@/components/shared/FilterBar'
+import { Eye, Pencil, Plus, RefreshCw, Trash2 } from 'lucide-react'
+import { toast } from 'sonner'
+import { useGetContactsQuery } from '@/features/contacts/contactsApi'
+import {
+  useGetDebtsQuery, useGetDebtByIdQuery, useAddDebtMutation,
+  useUpdateDebtMutation, useDeleteDebtMutation,
+  type Debt, type DebtFilters,
+} from '@/features/debts/debtsApi'
+import { createDebtSchema, type DebtFormValues } from '@/features/debts/debtsSchema'
 import { PageHeader } from '@/components/shared/PageHeader'
-import { StatCard } from '@/components/shared/StatCard'
 import { Button } from '@/components/ui/button'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
-import { debtStats, debts } from '@/mocks/mockData'
-
-type DialogMode = 'add' | 'edit' | null
+import { Badge } from '@/components/ui/badge'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field'
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 
 export default function DebtsPage() {
   const { t } = useTranslation()
-  const [dialogMode, setDialogMode] = useState<DialogMode>(null)
+  const [open, setOpen] = useState(false)
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [dateRequired, setDateRequired] = useState(false)
+  const [deletingDebt, setDeletingDebt] = useState<Debt | null>(null)
+  const [viewingId, setViewingId] = useState<string | null>(null)
+  const [filters, setFilters] = useState<DebtFilters>({})
+  const { currentData: debts = [], isFetching, isError, refetch } = useGetDebtsQuery(filters)
+  const {
+    data: contacts = [], isLoading: contactsLoading, isError: contactsError,
+    refetch: refetchContacts,
+  } = useGetContactsQuery()
+  const {
+    currentData: viewedDebt, isFetching: detailsLoading, isError: detailsError,
+    refetch: refetchDetails,
+  } = useGetDebtByIdQuery(viewingId ?? '', { skip: viewingId === null })
+  const [addDebt, { isLoading: isAdding }] = useAddDebtMutation()
+  const [updateDebt, { isLoading: isUpdating }] = useUpdateDebtMutation()
+  const [deleteDebt, { isLoading: isDeleting }] = useDeleteDebtMutation()
+  const schema = createDebtSchema(t, dateRequired)
+  const {
+    reset, setValue, register, handleSubmit, control,
+    formState: { errors, isSubmitting },
+  } = useForm<DebtFormValues>({
+    resolver: zodResolver(schema.extend({
+      contact_id: schema.shape.contact_id.refine(
+        (id) => contacts.some((contact) => contact.id === id),
+        t('pages.debts.validation.contact'),
+      ),
+    })),
+    defaultValues: {
+      contact_id: '', direction: 'they_owe_me', amount: 0,
+      currency: 'USD', description: '', due_date: '',
+    },
+  })
+  const isSaving = isSubmitting || isAdding || isUpdating
+  const contactsUnavailable = contactsLoading || contactsError || contacts.length === 0
+  const hasFilters = Boolean(filters.direction || filters.status || filters.contact_id)
+
+  function contactName(id: string) {
+    return contacts.find((contact) => contact.id === id)?.name
+      ?? t('pages.debts.unknownContact', { id })
+  }
+
+  function handleOpenAdd() {
+    setEditingId(null)
+    setDateRequired(false)
+    reset()
+    setOpen(true)
+  }
+
+  function handleOpenEdit(debt: Debt) {
+    setEditingId(debt.id)
+    setDateRequired(Boolean(debt.due_date))
+    reset()
+    setValue('contact_id', debt.contact_id)
+    setValue('direction', debt.direction)
+    setValue('amount', Number(debt.amount))
+    setValue('currency', debt.currency)
+    setValue('description', debt.description ?? '')
+    setValue('due_date', debt.due_date?.slice(0, 10) ?? '')
+    setOpen(true)
+  }
+
+  const onSubmit: SubmitHandler<DebtFormValues> = async (data) => {
+    if (isAdding || isUpdating || contactsUnavailable) return
+    const payload = { ...data, due_date: data.due_date || undefined }
+    try {
+      if (editingId !== null) {
+        await updateDebt({ id: editingId, ...payload }).unwrap()
+        toast.success(t('pages.debts.messages.updated'))
+      } else {
+        await addDebt(payload).unwrap()
+        toast.success(t('pages.debts.messages.created'))
+      }
+      setOpen(false)
+      setEditingId(null)
+      reset()
+    } catch {
+      toast.error(t('pages.debts.messages.saveError'))
+    }
+  }
+
+  async function handleDelete() {
+    if (!deletingDebt || isDeleting) return
+    try {
+      await deleteDebt(deletingDebt.id).unwrap()
+      toast.success(t('pages.debts.messages.deleted'))
+      setDeletingDebt(null)
+    } catch {
+      toast.error(t('pages.debts.messages.deleteError'))
+    }
+  }
 
   return (
     <div className="space-y-6">
-      <PageHeader
-        title={t('pages.debts.title')}
-        description={t('pages.debts.subtitle')}
-        actions={
-          <Button type="button" onClick={() => setDialogMode('add')}>
-            <Plus />
-            {t('common.add')}
-          </Button>
-        }
-      />
+      <PageHeader title={t('pages.debts.title')} description={t('pages.debts.subtitle')}
+        actions={<Button onClick={handleOpenAdd} disabled={contactsUnavailable}><Plus />{t('common.add')}</Button>} />
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {debtStats.map((item) => (
-          <StatCard key={item.id} item={item} />
-        ))}
-      </div>
+      {contactsLoading && <p role="status" className="text-sm text-muted-foreground">{t('pages.debts.contactsLoading')}</p>}
+      {contactsError && <div role="alert" className="flex flex-wrap items-center gap-3 text-sm text-destructive">
+        {t('pages.debts.contactsError')}
+        <Button variant="outline" onClick={() => void refetchContacts()}>{t('pages.debts.retry')}</Button>
+      </div>}
+      {!contactsLoading && !contactsError && contacts.length === 0 &&
+        <p className="text-sm text-muted-foreground">{t('pages.debts.noContacts')}</p>}
 
       <Card className="border-border/70 shadow-sm">
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between gap-3">
           <CardTitle>{t('pages.debts.title')}</CardTitle>
-          <CardDescription>
-            Поиск и фильтры показаны как визуальный каркас
-          </CardDescription>
+          <Button variant="outline" disabled={isFetching} onClick={() => void refetch()}>
+            <RefreshCw className={isFetching ? 'animate-spin' : ''} />{t('pages.debts.refresh')}
+          </Button>
         </CardHeader>
-        <CardContent>
-          <FilterBar
-            searchPlaceholder={`${t('common.search')}: ${t('nav.debts')}`}
-            filters={[
-              {
-                label: t('common.status'),
-                options: [
-                  { value: 'all', label: t('common.all') },
-                  { value: 'active', label: 'Активен' },
-                  { value: 'pending', label: 'Ожидает' },
-                  { value: 'overdue', label: 'Просрочен' },
-                  { value: 'paid', label: 'Оплачен' },
-                ],
-              },
-              {
-                label: 'Папка',
-                options: [
-                  { value: 'all', label: t('common.all') },
-                  { value: 'personal', label: 'Личные' },
-                  { value: 'work', label: 'Работа' },
-                  { value: 'family', label: 'Семья' },
-                  { value: 'partners', label: 'Партнёры' },
-                ],
-              },
-            ]}
-            actionLabel={t('common.add')}
-            onAction={() => setDialogMode('add')}
-          />
+        <CardContent className="space-y-4">
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            <Select value={filters.direction ?? 'all'} onValueChange={(value) => setFilters({ ...filters, direction: value === 'all' ? undefined : value as DebtFilters['direction'] })}>
+              <SelectTrigger className="w-full" aria-label={t('pages.debts.direction')}><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">{t('common.all')}</SelectItem>
+                <SelectItem value="they_owe_me">{t('pages.debts.they_owe_me')}</SelectItem>
+                <SelectItem value="i_owe_them">{t('pages.debts.i_owe_them')}</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={filters.status ?? 'all'} onValueChange={(value) => setFilters({ ...filters, status: value === 'all' ? undefined : value as DebtFilters['status'] })}>
+              <SelectTrigger className="w-full" aria-label={t('common.status')}><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">{t('common.all')}</SelectItem>
+                {(['pending', 'partial', 'paid'] as const).map((status) => <SelectItem key={status} value={status}>{t(`pages.debts.${status}`)}</SelectItem>)}
+              </SelectContent>
+            </Select>
+            <Select value={filters.contact_id ?? 'all'} disabled={contactsUnavailable} onValueChange={(value) => setFilters({ ...filters, contact_id: value === 'all' ? undefined : value })}>
+              <SelectTrigger className="w-full" aria-label={t('pages.debts.contact')}><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">{t('common.all')}</SelectItem>
+                {contacts.map((contact) => <SelectItem key={contact.id} value={contact.id}>{contact.name}</SelectItem>)}
+              </SelectContent>
+            </Select>
+            <Button variant="outline" disabled={!hasFilters} onClick={() => setFilters({})}>{t('pages.debts.resetFilters')}</Button>
+          </div>
 
-          <Tabs defaultValue="all">
-            <div className="no-scrollbar mb-4 max-w-full overflow-x-auto">
-              <TabsList>
-                <TabsTrigger value="all">{t('common.all')}</TabsTrigger>
-                <TabsTrigger value="active">Активные</TabsTrigger>
-                <TabsTrigger value="overdue">Просроченные</TabsTrigger>
-                <TabsTrigger value="paid">Оплаченные</TabsTrigger>
-              </TabsList>
-            </div>
-
-            <TabsContent value="all" className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-[12%]">ID</TableHead>
-                    <TableHead className="w-[24%]">Должник</TableHead>
-                    <TableHead className="w-[16%]">Папка</TableHead>
-                    <TableHead className="w-[16%]">Сумма</TableHead>
-                    <TableHead className="w-[14%]">Срок</TableHead>
-                    <TableHead className="w-[18%] text-right">Действия</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {debts.map((row) => (
-                    <TableRow key={row.id}>
-                      <TableCell className="font-mono text-xs">{row.id}</TableCell>
-                      <TableCell className="font-medium whitespace-nowrap">
-                        {row.debtor}
-                      </TableCell>
-                      <TableCell className="whitespace-nowrap">{row.folder}</TableCell>
-                      <TableCell className="whitespace-nowrap">{row.amount}</TableCell>
-                      <TableCell className="whitespace-nowrap">{row.dueDate}</TableCell>
-                      <TableCell>
-                        <div className="flex justify-end gap-1">
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon-sm"
-                            aria-label={`${t('common.edit')} ${row.id}`}
-                            onClick={() => setDialogMode('edit')}
-                          >
-                            <Pencil />
-                          </Button>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon-sm"
-                            disabled
-                            aria-label={`В архив ${row.id}`}
-                            title="Действие появится после backend"
-                          >
-                            <Archive />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TabsContent>
-
-            {['active', 'overdue', 'paid'].map((tab) => (
-              <TabsContent key={tab} value={tab}>
-                <div className="rounded-xl border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
-                  Демонстрационная вкладка. Фильтрация данных появится после
-                  подключения backend.
-                </div>
-              </TabsContent>
-            ))}
-          </Tabs>
+          {isFetching && debts.length === 0 && <div role="status" aria-label={t('pages.debts.refresh')} className="space-y-3">
+            {[1, 2, 3].map((id) => <Skeleton key={id} className="h-14 w-full" />)}
+          </div>}
+          {isError && <div role="alert" className="space-y-3 py-8 text-center">
+            <p>{t('pages.debts.loadError')}</p>
+            <Button variant="outline" disabled={isFetching} onClick={() => void refetch()}>{t('pages.debts.retry')}</Button>
+          </div>}
+          {!isFetching && !isError && debts.length === 0 && <p className="py-10 text-center text-muted-foreground">
+            {t(hasFilters ? 'pages.debts.noResults' : 'pages.debts.empty')}
+          </p>}
+          {!isError && debts.length > 0 && <div className="overflow-x-auto" aria-busy={isFetching}>
+            <Table>
+              <TableHeader><TableRow>
+                <TableHead>{t('pages.debts.contact')}</TableHead>
+                <TableHead>{t('pages.debts.direction')}</TableHead>
+                <TableHead>{t('pages.debts.amount')}</TableHead>
+                <TableHead>{t('common.status')}</TableHead>
+                <TableHead>{t('pages.debts.due_date')}</TableHead>
+                <TableHead>{t('pages.debts.description')}</TableHead>
+                <TableHead className="text-right">{t('pages.debts.actions')}</TableHead>
+              </TableRow></TableHeader>
+              <TableBody>{debts.map((debt) => <TableRow key={debt.id}>
+                <TableCell className="font-medium">{contactName(debt.contact_id)}</TableCell>
+                <TableCell>{t(`pages.debts.${debt.direction}`)}</TableCell>
+                <TableCell className="whitespace-nowrap tabular-nums">{debt.amount} {debt.currency}</TableCell>
+                <TableCell><Badge variant="outline" className={debt.status === 'paid' ? 'bg-success/10 text-success' : debt.status === 'partial' ? 'bg-primary/10 text-primary' : 'bg-warning/10 text-warning'}>{t(`pages.debts.${debt.status}`)}</Badge></TableCell>
+                <TableCell className="whitespace-nowrap">{debt.due_date?.slice(0, 10) ?? '—'}</TableCell>
+                <TableCell className="max-w-60"><p className="line-clamp-2 break-words">{debt.description || '—'}</p></TableCell>
+                <TableCell><div className="flex justify-end gap-1">
+                  <Button variant="ghost" size="icon-sm" aria-label={`${t('common.view')} ${debt.id}`} onClick={() => setViewingId(debt.id)}><Eye /></Button>
+                  <Button variant="ghost" size="icon-sm" aria-label={`${t('common.edit')} ${debt.id}`} disabled={contactsUnavailable} onClick={() => handleOpenEdit(debt)}><Pencil /></Button>
+                  <Button variant="ghost" size="icon-sm" className="text-destructive" aria-label={`${t('pages.debts.delete')} ${debt.id}`} disabled={isDeleting} onClick={() => setDeletingDebt(debt)}><Trash2 /></Button>
+                </div></TableCell>
+              </TableRow>)}</TableBody>
+            </Table>
+          </div>}
         </CardContent>
       </Card>
 
-      <DemoActionDialog
-        open={dialogMode !== null}
-        onOpenChange={(open) => {
-          if (!open) setDialogMode(null)
-        }}
-        title={
-          dialogMode === 'edit' ? 'Редактирование долга' : 'Добавление долга'
-        }
-        description="Форма подготовлена как визуальный каркас. Состав полей уточняется после изучения backend."
-      />
+      <Dialog open={open} onOpenChange={(value) => { if (!isSaving) setOpen(value) }}>
+        <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>{t(editingId ? 'pages.debts.editTitle' : 'pages.debts.addTitle')}</DialogTitle>
+            <DialogDescription>{t('pages.debts.formDescription')}</DialogDescription>
+          </DialogHeader>
+          <form noValidate onSubmit={handleSubmit(onSubmit)}>
+            <fieldset disabled={isSaving}>
+              <FieldGroup>
+                <Controller name="contact_id" control={control} render={({ field }) => (
+                  <Field data-invalid={Boolean(errors.contact_id)}>
+                    <FieldLabel htmlFor="debt-contact">{t('pages.debts.contact')}</FieldLabel>
+                    <Select name={field.name} value={field.value} onValueChange={field.onChange} disabled={isSaving || contactsUnavailable}>
+                      <SelectTrigger id="debt-contact" ref={field.ref} onBlur={field.onBlur} className="w-full" aria-invalid={Boolean(errors.contact_id)} aria-describedby="debt-contact-error"><SelectValue placeholder={t('pages.debts.chooseContact')} /></SelectTrigger>
+                      <SelectContent>{contacts.map((contact) => <SelectItem key={contact.id} value={contact.id}>{contact.name}</SelectItem>)}</SelectContent>
+                    </Select>
+                    <FieldError id="debt-contact-error" errors={errors.contact_id ? [errors.contact_id] : undefined} />
+                  </Field>
+                )} />
+                <Field>
+                  <FieldLabel htmlFor="debt-direction">{t('pages.debts.direction')}</FieldLabel>
+                  <select id="debt-direction" className="h-9 w-full rounded-lg border border-input bg-background px-3 text-sm" aria-invalid={Boolean(errors.direction)} {...register('direction')}>
+                    <option value="they_owe_me">{t('pages.debts.they_owe_me')}</option>
+                    <option value="i_owe_them">{t('pages.debts.i_owe_them')}</option>
+                  </select>
+                  <FieldError errors={errors.direction ? [errors.direction] : undefined} />
+                </Field>
+                {(['amount', 'currency', 'description', 'due_date'] as const).map((name) => <Field key={name} data-invalid={Boolean(errors[name])}>
+                  <FieldLabel htmlFor={`debt-${name}`}>{t(`pages.debts.${name}`)}</FieldLabel>
+                  <Input id={`debt-${name}`} type={name === 'amount' ? 'number' : name === 'due_date' ? 'date' : 'text'}
+                    step={name === 'amount' ? 'any' : undefined}
+                    aria-invalid={Boolean(errors[name])} aria-describedby={`debt-${name}-error`}
+                    {...register(name, name === 'amount' ? { valueAsNumber: true } : {})} />
+                  <FieldError id={`debt-${name}-error`} errors={errors[name] ? [errors[name]] : undefined} />
+                </Field>)}
+                {dateRequired && <p className="text-sm text-muted-foreground">{t('pages.debts.dateHint')}</p>}
+              </FieldGroup>
+            </fieldset>
+            <DialogFooter className="mt-6">
+              <Button type="button" variant="outline" disabled={isSaving} onClick={() => setOpen(false)}>{t('pages.debts.cancel')}</Button>
+              <Button type="submit" disabled={isSaving || contactsUnavailable}>{t(isSaving ? 'pages.debts.saving' : 'pages.debts.save')}</Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      <AlertDialog open={deletingDebt !== null} onOpenChange={(value) => { if (!value && !isDeleting) setDeletingDebt(null) }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('pages.debts.deleteTitle')}</AlertDialogTitle>
+            <AlertDialogDescription>{t('pages.debts.deleteDescription', { amount: deletingDebt?.amount, currency: deletingDebt?.currency })}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>{t('pages.debts.cancel')}</AlertDialogCancel>
+            <AlertDialogAction variant="destructive" disabled={isDeleting} onClick={(event) => { event.preventDefault(); void handleDelete() }}>
+              {t(isDeleting ? 'pages.debts.deleting' : 'pages.debts.delete')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <Dialog open={viewingId !== null} onOpenChange={(value) => { if (!value) setViewingId(null) }}>
+        <DialogContent className="max-h-[90dvh] overflow-y-auto">
+          <DialogHeader><DialogTitle>{t('pages.debts.detailsTitle')}</DialogTitle><DialogDescription>{viewingId}</DialogDescription></DialogHeader>
+          {detailsLoading && <Skeleton className="h-40 w-full" />}
+          {detailsError && <div role="alert" className="space-y-3"><p>{t('pages.debts.detailsError')}</p><Button variant="outline" disabled={detailsLoading} onClick={() => void refetchDetails()}>{t('pages.debts.retry')}</Button></div>}
+          {!detailsLoading && !detailsError && viewedDebt && <dl className="grid grid-cols-[auto_1fr] gap-3 text-sm">
+            <dt className="text-muted-foreground">{t('pages.debts.contact')}</dt><dd className="break-words">{contactName(viewedDebt.contact_id)}</dd>
+            <dt className="text-muted-foreground">{t('pages.debts.direction')}</dt><dd>{t(`pages.debts.${viewedDebt.direction}`)}</dd>
+            <dt className="text-muted-foreground">{t('pages.debts.amount')}</dt><dd>{viewedDebt.amount} {viewedDebt.currency}</dd>
+            <dt className="text-muted-foreground">{t('common.status')}</dt><dd>{t(`pages.debts.${viewedDebt.status}`)}</dd>
+            <dt className="text-muted-foreground">{t('pages.debts.due_date')}</dt><dd>{viewedDebt.due_date?.slice(0, 10) ?? '—'}</dd>
+            <dt className="text-muted-foreground">{t('pages.debts.description')}</dt><dd className="min-w-0 whitespace-pre-wrap break-words">{viewedDebt.description || '—'}</dd>
+          </dl>}
+          <DialogFooter><Button variant="outline" onClick={() => setViewingId(null)}>{t('pages.debts.close')}</Button></DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

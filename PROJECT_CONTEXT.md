@@ -298,3 +298,11 @@ npm run build
 ```
 
 Перед началом любой работы также прочитай `AGENTS.md`, `CODING_STYLE.md`, `TASKS.md`, последние записи `DEVELOPMENT_LOG.md`, а также проверь `git status --short` и `git log --oneline -10`.
+
+## Актуализация 2026-11-21 — Debts CRUD
+
+Страница /debts теперь использует настоящий API через src/features/debts/debtsApi.ts: список с status/direction/contact_id, detail, POST/PATCH/DELETE. Форма RHF/Zod реализована в подтверждённом стиле через register/setValue/reset/handleSubmit/SubmitHandler и useState, без useEffect. Локализация долгов находится в src/i18n/debts.ts (RU/TJ/EN). Моковые долги и финансовая статистика удалены со страницы долгов. Общий shell, темы, авторизация и Refresh Token сохранены.
+
+Debt/Dashboard tags добавлены в baseApi; существующий dashboard query получает Dashboard tag через enhanceEndpoints в main.tsx после загрузки модулей с проверкой наличия endpoint, чтобы не включать чужой untracked dashboardApi.ts в коммит. Существующие незакоммиченные Contacts/Folders/Dashboard/auth и design assets сохранены; исходная копия — .git/debts-crud-backup-20261121-154009.
+
+Контракт проверен по локальному backend (исходники только прочитаны). Дата необязательна при создании; существующую дату разрешено заменить, но невозможно очистить по API. Статус не редактируется, остаток не вычисляется. DELETE каскадно удаляет платежи, что объяснено в UI. Целевые TypeScript/ESLint, schema/RTK Query checks, Vite build и dev-маршруты успешны. Полные проверки блокируются прежними ошибками; авторизованный CRUD и браузерная проверка требуют тестовой сессии. Детали ограничений и Code Review — в DEVELOPMENT_LOG.md.

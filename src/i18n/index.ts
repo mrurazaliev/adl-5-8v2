@@ -1,3 +1,4 @@
+import { debtsTranslations } from '@/i18n/debts'
 import i18n from 'i18next'
 import { initReactI18next } from 'react-i18next'
 
@@ -109,10 +110,7 @@ const resources = {
           iOweDescription:
             'Демонстрационная форма долга: я должен. Сохранение появится после подключения backend.',
         },
-        debts: {
-          title: 'Долги',
-          subtitle: 'Список долговых записей',
-        },
+        debts: debtsTranslations.ru,
         contacts: {
           title: 'Контакты',
           subtitle: 'Контакты и связи с должниками',
@@ -282,10 +280,7 @@ const resources = {
           iOweDescription:
             'Шакли намоишии қарз: ман қарздор. Сабт пас аз пайвастшавӣ ба backend дастрас мешавад.',
         },
-        debts: {
-          title: 'Қарзҳо',
-          subtitle: 'Рӯйхати сабтҳои қарз',
-        },
+        debts: debtsTranslations.tj,
         contacts: {
           title: 'Тамосҳо',
           subtitle: 'Тамосҳо ва робита бо қарздорон',
@@ -452,10 +447,7 @@ const resources = {
           iOweDescription:
             'Demo debt form: I owe. Saving will be available after backend integration.',
         },
-        debts: {
-          title: 'Debts',
-          subtitle: 'Debt records overview',
-        },
+        debts: debtsTranslations.en,
         contacts: {
           title: 'Contacts',
           subtitle: 'Contacts and debtor relationships',
