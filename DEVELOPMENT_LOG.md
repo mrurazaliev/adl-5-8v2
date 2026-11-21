@@ -802,3 +802,59 @@
 
 - Создать отдельный коммит `feat: add profile menu and logout` без push.
 - Передать владельцу список проверок, которые требуют ручного тестирования с реальной сессией.
+
+---
+
+## 2026-11-21 — CRUDcontacts через RTK Query
+
+### Цель
+
+Реализовать полный CRUD контактов через существующий backend, не изменяя backend, авторизацию, дизайн и посторонние незакоммиченные файлы.
+
+### Что проверено перед стартом
+
+- Прочитаны `AGENTS.md`, `PROJECT_CONTEXT.md`, `CODING_STYLE.md`, `TASKS.md` и последние записи `DEVELOPMENT_LOG.md`.
+- Ветка `master`, HEAD `2ac0f41`; status содержал посторонние изменения в `RegisterPage.tsx`, `DashboardPage.tsx`, `registrSchema.tsx`, `src/features/dashboard/`, untracked design assets и `contactsSlice.ts`.
+- Фактические `ContactsPage.tsx`, `contactsApi.ts`, `baseApi.ts`, `store.ts`, `i18n/index.ts`, shadcn `Dialog`, `AlertDialog`, `Field`, `Input` и `Label` прочитаны до изменений.
+- `OPTIONS` для `POST /api/contacts`, `PATCH /api/contacts/:id`, `DELETE /api/contacts/:id`, `GET /api/contacts/:id`, `GET /api/folders` и `GET /api/contacts?folder_id=...` вернул `HTTP 204`.
+- Локальный Swagger-файл отсутствует; реальные POST/PATCH/DELETE без тестовых данных не выполнялись.
+
+### Что реализовано
+
+- `src/api/baseApi.ts`: добавлен `tagTypes: ['Contact']`, исправлен отступ `cache`, `prepareHeaders` не изменён.
+- `src/features/contacts/contactsApi.ts`: добавлены `getContact`, `createContact`, `updateContact`, `deleteContact` и инвалидация Contact LIST/detail tags.
+- `src/features/contacts/contactsSchema.ts`: Zod-схема name/phone/email/note с сообщениями через `createContactSchema(t)`.
+- `src/pages/Contacts/ContactsPage.tsx`: демо-диалог заменён реальными Add/Edit формами на RHF + Zod + `Field`, добавлен Delete `AlertDialog`, тосты sonner, note в карточке, поиск, loading/error/empty/no-results/success состояния и локализация текста.
+- `src/i18n/index.ts`: добавлены ключи contacts CRUD для ru/tj/en, включая validation-сообщения.
+- Fan out mutation payload содержит только `name`, `phone`, `email`, `note`; server-поля и `folder_id` не отправляются.
+
+### Изменённые файлы
+
+- `src/api/baseApi.ts`, `src/features/contacts/contactsApi.ts`, `src/features/contacts/contactsSchema.ts`, `src/pages/Contacts/ContactsPage.tsx`, `src/i18n/index.ts`.
+- `PROJECT_CONTEXT.md`, `TASKS.md`, `DEVELOPMENT_LOG.md`.
+
+### Проблемы
+
+- Полные `npm run lint`, `npm run typecheck` и `npm run build` по-прежнему падают из-за посторонних/сохранённых файлов: `authApi.ts`, `contactsSlice.ts`, `LoginPage.tsx`, `RegisterPage.tsx`.
+- Браузерная проверка реальных mutation-сценариев недоступна без тестовых учётных данных и подготовленных контактов.
+- Формат ответа `GET /api/folders` не изучался, поэтому выбор папки не добавлялся.
+
+### Решения
+
+- Посторонние незакоммиченные файлы не изменялись и не включались в коммит.
+- Для нового кода использованы отдельный target tsconfig вне репозитория, targeted ESLint, `npx vite build` и dev-проверка маршрута.
+- Успех/ошибки mutations показываются через уже подключённый `sonner`, без новой библиотеки.
+- i18n-ключи добавлены во все три языка без изменения языка по умолчанию.
+
+### Результаты проверок
+
+- Targeted `npx tsc -p C:/Users/User/AppData/Local/Temp/opencode/tsconfig.contacts-crud.json --pretty false` — успешно.
+- `npx eslint src/api/baseApi.ts src/features/contacts/contactsApi.ts src/features/contacts/contactsSchema.ts src/pages/Contacts/ContactsPage.tsx src/i18n/index.ts` — успешно.
+- `npx vite build` — успешно, только warning о размере JS-чанка.
+- `npm run dev -- --host 127.0.0.1 --port 4193 --strictPort`: `GET /contacts` — `HTTP 200`, лог Vite без ошибок.
+- `npm run lint`, `npm run typecheck`, `npm run build` — заблокированы известными посторонними ошибками; новых ошибок в файлах CRUDcontacts нет.
+
+### Далее
+
+- Создать отдельный коммит `feat: implement contacts CRUD with RTK Query` без push.
+- Провести браузерную проверку create/edit/delete и валидации с подготовленными тестовыми данными; реальные mutation-запросы не выполнялись.

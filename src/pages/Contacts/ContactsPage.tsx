@@ -1,15 +1,36 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { useTranslation } from 'react-i18next'
-import { Mail, Pencil, Phone, Plus, RefreshCw } from 'lucide-react'
+import { useForm } from 'react-hook-form'
+import { Mail, Pencil, Phone, Plus, RefreshCw, Trash2 } from 'lucide-react'
+import { toast } from 'sonner'
 
-import { useGetContactsQuery } from '@/features/contacts/contactsApi'
+import {
+  useCreateContactMutation,
+  useDeleteContactMutation,
+  useGetContactsQuery,
+  useUpdateContactMutation,
+} from '@/features/contacts/contactsApi'
+import type { Contact } from '@/features/contacts/contactsApi'
+import {
+  createContactSchema,
+  type ContactFormValues,
+} from '@/features/contacts/contactsSchema'
 
-import { DemoActionDialog } from '@/components/shared/DemoActionDialog'
 import { PageHeader } from '@/components/shared/PageHeader'
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
-
 import {
   Card,
   CardContent,
@@ -17,13 +38,36 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from '@/components/ui/field'
+import { Input } from '@/components/ui/input'
 
 type DialogMode = 'add' | 'edit' | null
+
+function toNullable(value: string): string | null {
+  const normalized = value.trim()
+
+  return normalized ? normalized : null
+}
 
 export default function ContactsPage() {
   const { t } = useTranslation()
 
   const [dialogMode, setDialogMode] = useState<DialogMode>(null)
+  const [editingContact, setEditingContact] = useState<Contact | null>(null)
+  const [deletingContact, setDeletingContact] = useState<Contact | null>(null)
   const [search, setSearch] = useState('')
 
   const {
@@ -33,6 +77,33 @@ export default function ContactsPage() {
     isError,
     refetch,
   } = useGetContactsQuery()
+
+  const [createContact, { isLoading: isCreating }] = useCreateContactMutation()
+  const [updateContact, { isLoading: isUpdating }] = useUpdateContactMutation()
+  const [deleteContact, { isLoading: isDeleting }] = useDeleteContactMutation()
+
+  const form = useForm<ContactFormValues>({
+    resolver: zodResolver(createContactSchema(t)),
+    defaultValues: {
+      name: '',
+      phone: '',
+      email: '',
+      note: '',
+    },
+  })
+
+  const { errors } = form.formState
+
+  useEffect(() => {
+    if (dialogMode === null) return
+
+    form.reset({
+      name: editingContact?.name ?? '',
+      phone: editingContact?.phone ?? '',
+      email: editingContact?.email ?? '',
+      note: editingContact?.note ?? '',
+    })
+  }, [dialogMode, editingContact, form])
 
   const filteredContacts = contacts.filter((contact) => {
     const query = search.trim().toLowerCase()
@@ -44,46 +115,93 @@ export default function ContactsPage() {
     )
   })
 
+  const isSaving = isCreating || isUpdating
+
+  function handleOpenAdd() {
+    setEditingContact(null)
+    setDialogMode('add')
+  }
+
+  function handleOpenEdit(contact: Contact) {
+    setEditingContact(contact)
+    setDialogMode('edit')
+  }
+
+  function handleCloseDialog() {
+    setDialogMode(null)
+    setEditingContact(null)
+  }
+
+  async function handleSubmitForm(values: ContactFormValues) {
+    const payload = {
+      name: values.name.trim(),
+      phone: toNullable(values.phone),
+      email: toNullable(values.email),
+      note: toNullable(values.note),
+    }
+
+    try {
+      if (dialogMode === 'edit' && editingContact) {
+        await updateContact({ id: editingContact.id, ...payload }).unwrap()
+        toast.success(t('pages.contacts.messages.updated'))
+      } else {
+        await createContact(payload).unwrap()
+        toast.success(t('pages.contacts.messages.created'))
+      }
+
+      handleCloseDialog()
+    } catch {
+      toast.error(t('pages.contacts.messages.saveError'))
+    }
+  }
+
+  async function handleDelete() {
+    if (!deletingContact) return
+
+    try {
+      await deleteContact(deletingContact.id).unwrap()
+      toast.success(t('pages.contacts.messages.deleted'))
+      setDeletingContact(null)
+    } catch {
+      toast.error(t('pages.contacts.messages.deleteError'))
+    }
+  }
+
   return (
     <div className="space-y-6">
       <PageHeader
         title={t('pages.contacts.title')}
         description={t('pages.contacts.subtitle')}
         actions={
-          <Button
-            type="button"
-            onClick={() => setDialogMode('add')}
-          >
+          <Button type="button" onClick={handleOpenAdd}>
             <Plus className="size-4" />
             {t('common.add')}
           </Button>
         }
       />
 
-      {/* Search */}
       <div className="flex flex-wrap items-center gap-3">
-        <input
+        <Input
           type="search"
           value={search}
           onChange={(event) => setSearch(event.target.value)}
-          placeholder="Поиск контактов..."
-          className="h-10 min-w-0 flex-1 rounded-lg border border-input bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          placeholder={t('pages.contacts.searchPlaceholder')}
+          className="h-10 min-w-0 flex-1"
         />
 
         <Button
           type="button"
           variant="outline"
-          onClick={() => refetch()}
+          onClick={() => void refetch()}
           disabled={isFetching}
         >
           <RefreshCw
             className={`size-4 ${isFetching ? 'animate-spin' : ''}`}
           />
-          Обновить
+          {t('pages.contacts.refresh')}
         </Button>
       </div>
 
-      {/* Loading */}
       {isLoading && (
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {Array.from({ length: 6 }).map((_, index) => (
@@ -99,49 +217,43 @@ export default function ContactsPage() {
         </div>
       )}
 
-      {/* Error */}
       {isError && (
         <Card className="border-destructive/30">
           <CardContent className="flex flex-col items-center gap-3 py-10">
             <p className="text-sm text-destructive">
-              Не удалось загрузить контакты.
+              {t('pages.contacts.loadError')}
             </p>
 
             <Button
               type="button"
               variant="outline"
-              onClick={() => refetch()}
+              onClick={() => void refetch()}
             >
-              Попробовать снова
+              {t('pages.contacts.retry')}
             </Button>
           </CardContent>
         </Card>
       )}
 
-      {/* Empty State */}
       {!isLoading && !isError && contacts.length === 0 && (
         <Card>
           <CardContent className="flex flex-col items-center gap-3 py-12">
             <p className="text-lg font-semibold">
-              Контактов пока нет
+              {t('pages.contacts.emptyTitle')}
             </p>
 
             <p className="text-center text-sm text-muted-foreground">
-              Добавьте первый контакт, чтобы начать работу.
+              {t('pages.contacts.emptyDescription')}
             </p>
 
-            <Button
-              type="button"
-              onClick={() => setDialogMode('add')}
-            >
+            <Button type="button" onClick={handleOpenAdd}>
               <Plus className="size-4" />
-              Добавить контакт
+              {t('pages.contacts.addContact')}
             </Button>
           </CardContent>
         </Card>
       )}
 
-      {/* No Search Results */}
       {!isLoading &&
         !isError &&
         contacts.length > 0 &&
@@ -149,13 +261,12 @@ export default function ContactsPage() {
           <Card>
             <CardContent className="py-10 text-center">
               <p className="text-sm text-muted-foreground">
-                По вашему запросу ничего не найдено.
+                {t('pages.contacts.noResults')}
               </p>
             </CardContent>
           </Card>
         )}
 
-      {/* Real Contacts */}
       {!isLoading && !isError && (
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {filteredContacts.map((contact) => (
@@ -193,22 +304,37 @@ export default function ContactsPage() {
                   {contact.email && (
                     <p className="flex items-center gap-2 truncate text-muted-foreground">
                       <Mail className="size-4 shrink-0" />
-                      <span className="truncate">
-                        {contact.email}
-                      </span>
+                      <span className="truncate">{contact.email}</span>
+                    </p>
+                  )}
+
+                  {contact.note && (
+                    <p className="line-clamp-2 text-sm text-muted-foreground">
+                      {contact.note}
                     </p>
                   )}
                 </div>
 
-                <div className="flex items-center justify-end border-t border-border/70 pt-3">
+                <div className="flex items-center justify-end gap-1 border-t border-border/70 pt-3">
                   <Button
                     type="button"
                     variant="ghost"
                     size="sm"
-                    onClick={() => setDialogMode('edit')}
+                    onClick={() => handleOpenEdit(contact)}
                   >
                     <Pencil className="size-4" />
                     {t('common.edit')}
+                  </Button>
+
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="text-destructive hover:text-destructive"
+                    onClick={() => setDeletingContact(contact)}
+                  >
+                    <Trash2 className="size-4" />
+                    {t('pages.contacts.delete')}
                   </Button>
                 </div>
               </CardContent>
@@ -217,18 +343,141 @@ export default function ContactsPage() {
         </div>
       )}
 
-      <DemoActionDialog
+      <Dialog
         open={dialogMode !== null}
         onOpenChange={(open) => {
-          if (!open) setDialogMode(null)
+          if (!open && !isSaving) handleCloseDialog()
         }}
-        title={
-          dialogMode === 'edit'
-            ? 'Редактирование контакта'
-            : 'Добавление контакта'
-        }
-        description="Функция добавления и редактирования контактов будет подключена к backend на следующем этапе."
-      />
+      >
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>
+              {dialogMode === 'edit'
+                ? t('pages.contacts.editTitle')
+                : t('pages.contacts.addTitle')}
+            </DialogTitle>
+
+            <DialogDescription>
+              {dialogMode === 'edit'
+                ? t('pages.contacts.editDescription')
+                : t('pages.contacts.addDescription')}
+            </DialogDescription>
+          </DialogHeader>
+
+          <form onSubmit={form.handleSubmit(handleSubmitForm)}>
+            <FieldGroup>
+              <Field data-invalid={Boolean(errors.name)}>
+                <FieldLabel htmlFor="contact-name">
+                  {t('pages.contacts.fields.name')}
+                </FieldLabel>
+                <Input
+                  id="contact-name"
+                  aria-invalid={Boolean(errors.name)}
+                  {...form.register('name')}
+                />
+                <FieldError errors={errors.name ? [errors.name] : undefined} />
+              </Field>
+
+              <Field data-invalid={Boolean(errors.phone)}>
+                <FieldLabel htmlFor="contact-phone">
+                  {t('pages.contacts.fields.phone')}
+                </FieldLabel>
+                <Input
+                  id="contact-phone"
+                  aria-invalid={Boolean(errors.phone)}
+                  {...form.register('phone')}
+                />
+                <FieldError
+                  errors={errors.phone ? [errors.phone] : undefined}
+                />
+              </Field>
+
+              <Field data-invalid={Boolean(errors.email)}>
+                <FieldLabel htmlFor="contact-email">
+                  {t('pages.contacts.fields.email')}
+                </FieldLabel>
+                <Input
+                  id="contact-email"
+                  type="email"
+                  aria-invalid={Boolean(errors.email)}
+                  {...form.register('email')}
+                />
+                <FieldError
+                  errors={errors.email ? [errors.email] : undefined}
+                />
+              </Field>
+
+              <Field data-invalid={Boolean(errors.note)}>
+                <FieldLabel htmlFor="contact-note">
+                  {t('pages.contacts.fields.note')}
+                </FieldLabel>
+                <Input
+                  id="contact-note"
+                  aria-invalid={Boolean(errors.note)}
+                  {...form.register('note')}
+                />
+                <FieldError errors={errors.note ? [errors.note] : undefined} />
+              </Field>
+            </FieldGroup>
+
+            <DialogFooter className="mt-6">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleCloseDialog}
+                disabled={isSaving}
+              >
+                {t('pages.contacts.cancel')}
+              </Button>
+
+              <Button type="submit" disabled={isSaving}>
+                {isSaving
+                  ? t('pages.contacts.saving')
+                  : t('pages.contacts.save')}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      <AlertDialog
+        open={deletingContact !== null}
+        onOpenChange={(open) => {
+          if (!open && !isDeleting) setDeletingContact(null)
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {t('pages.contacts.deleteTitle')}
+            </AlertDialogTitle>
+
+            <AlertDialogDescription>
+              {t('pages.contacts.deleteDescription')}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>
+              {t('pages.contacts.cancel')}
+            </AlertDialogCancel>
+
+            <AlertDialogAction
+              type="button"
+              variant="destructive"
+              disabled={isDeleting}
+              onClick={(event) => {
+                event.preventDefault()
+                void handleDelete()
+              }}
+            >
+              {isDeleting
+                ? t('pages.contacts.deleting')
+                : t('pages.contacts.delete')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

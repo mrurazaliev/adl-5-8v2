@@ -90,6 +90,13 @@
 - [x] В `main.tsx` подключён `Toaster` из уже установленного sonner; ThemeSwitcher не изменялся.
 - [x] Targeted ESLint, targeted TypeScript и `npx vite build` для профиля/логаута прошли; dev-сервер отдал `HTTP 200` для `/profile` и `/login`.
 - [x] По прямому решению владельца посторонние незакоммиченные файлы с ошибками проверок не изменялись; полные lint/typecheck/build остаются заблокированными.
+- [x] Проверены `OPTIONS` для `POST /api/contacts`, `PATCH /api/contacts/:id`, `DELETE /api/contacts/:id`, `GET /api/contacts/:id`, `GET /api/folders` и фильтра `folder_id` — все вернули `HTTP 204`.
+- [x] В `baseApi` добавлен `tagTypes: ['Contact']`; authorization/prepareHeaders не изменены.
+- [x] `contactsApi.ts` расширен endpoint’ами `getContact`, `createContact`, `updateContact`, `deleteContact` с инвалидацией Contact LIST/detail tags.
+- [x] Создан `contactsSchema.ts`: RHF-совместимая Zod-схема name/phone/email/note с локализованными сообщениями через `createContactSchema(t)`.
+- [x] `ContactsPage` заменил DemoActionDialog на реальные Add/Edit формы на RHF + Zod + `Field`; добавлен AlertDialog удаления, toast успеха/ошибок, note в карточке и локализация всех текстов ru/tj/en.
+- [x] Реальные POST/PATCH/DELETE не выполнялись без подготовленных тестовых данных и разрешения владельца.
+- [x] Targeted ESLint, target TypeScript, `npx vite build` и dev-проверка `/contacts` — успешно; полные проверки остаются заблокированными посторонними файлами.
 
 ## In Progress
 

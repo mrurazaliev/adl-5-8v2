@@ -5,9 +5,9 @@
 ## 1. Текущий статус
 
 Проект находится на этапе **визуального UI-каркаса публичной части и внутреннего Dashboard**. Реализованы публичная главная `/`, страницы входа `/login` и регистрации `/register`, а также внутренний layout с маршрутом `/dashboard` и сохранёнными маршрутами `/debts`, `/contacts`, `/folders`, `/payments`, `/users`, `/archive` на демонстрационных данных из `src/mocks/mockData.ts`.
-Dashboard приведён к трём карточкам, блоку «Финансовая статистика» и «Последние платежи», а также плавающей кнопке создания долга с демо-диалогами. Из таблицы долгов удалена колонка «Статус» при сохранении поля `status` в данных и фильтрах. Публичные страницы используют отдельные `PublicLayout`, `PublicHeader` и `AuthLayout` без Sidebar; язык и тема работают через существующие i18next и `uiSlice`. Реальные запросы подключены для login/register/refresh/logout, `GET /api/users/me`, contacts и dashboard summary; refreshToken хранится в localStorage, accessToken — в Redux. Внутренние маршруты защищены, добавлены меню пользователя и страница `/profile`. CRUD и финансовые расчёты **не реализованы**.
+Dashboard приведён к трём карточкам, блоку «Финансовая статистика» и «Последние платежи», а также плавающей кнопке создания долга с демо-диалогами. Из таблицы долгов удалена колонка «Статус» при сохранении поля `status` в данных и фильтрах. Публичные страницы используют отдельные `PublicLayout`, `PublicHeader` и `AuthLayout` без Sidebar; язык и тема работают через существующие i18next и `uiSlice`. Реальные запросы подключены для login/register/refresh/logout, `GET /api/users/me`, contacts и dashboard summary; refreshToken хранится в localStorage, accessToken — в Redux. Внутренние маршруты защищены, добавлены меню пользователя и страница `/profile`. CRUDContacts реализован; полный CRUD остальных разделов и финансовые расчёты **не реализованы**.
 
-Git-репозиторий инициализирован в корне проекта. Состояние перед этим этапом: `dc17a2b7fed2866a2fc4c770afbce032f38220f5` (`feat: add premium fintech landing and auth pages`). Изменения левой панели auth фиксируются отдельным коммитом `refactor: redesign auth left panel`. Push не выполнялся.
+Git-репозиторий инициализирован в корне проекта. Состояние перед CRUDcontacts: `2ac0f41` (`feat: add profile menu and logout`). Push не выполнялся.
 
 ## 2. Назначение приложения
 
@@ -155,10 +155,10 @@ src/
 - `createApi({ reducerPath: 'api', baseQuery: fetchBaseQuery({ baseUrl: import.meta.env.VITE_API_BASE_URL, prepareHeaders: Authorization: Bearer <accessToken> }), endpoints: () => ({}) })`.
 - `src/features/auth/authApi.ts` добавляет через `injectEndpoints` мутации `login`, `register`, `refresh` и `logout`; logout отправляет `POST /api/auth/logout` с типом `LogoutRequest` (`refreshToken`).
 - `src/features/auth/userApi.ts` добавляет query `getMe`: `GET /api/users/me`, тип `AuthUser`.
-- `src/features/contacts/contactsApi.ts` добавляет query `getContacts`: `GET /api/contacts`, тип `Contact` совпадает со структурой из задания/Swagger.
+- `src/features/contacts/contactsApi.ts` добавляет `getContacts`, `getContact`, `createContact`, `updateContact` и `deleteContact` для `/api/contacts`; `tagTypes: ['Contact']`, list-тег инвалидируется после mutations.
 - `src/features/dashboard/dashboardApi.ts` добавляет query `getDashboardSummary`: `GET /api/dashboard/summary`.
 - `authSlice.ts` подключён к store; `authSlice.tsx` как placeholder удалён из рабочего дерева.
-- `tagTypes` не определены, пока не известны реальные ресурсы backend.
+- `tagTypes: ['Contact']` определены для инвалидации кэша contacts.
 - Base API подключён к store; новая логика добавляется через `baseApi.injectEndpoints`.
 - loading/error и состояние отправки mutations/queries обеспечиваются RTK Query.
 
@@ -193,6 +193,7 @@ src/
 - Контракт logout задан владельцем: `POST /api/auth/logout`, payload `{ refreshToken }`; `OPTIONS` на этот путь вернул `204`. Реальный logout с валидным токеном не выполнялся.
 - Контракт пользователя задан владельцем: `GET /api/users/me`; запрос без токена вернул `401`, маршрут существует. Реальные данные без учётных данных не проверялись.
 - Контракт contacts задан владельцем: `GET /api/contacts`; `Contact` содержит `id`, `user_id`, `folder_id`, `name`, `phone`, `email`, `note`, `created_at`, `updated_at`. Запрос без токена вернул `401`, маршрут существует; реальные данные без учётных данных не проверялись.
+- CRUDcontacts: `OPTIONS` для `POST /api/contacts`, `PATCH /api/contacts/:id`, `DELETE /api/contacts/:id`, `GET /api/contacts/:id`, `GET /api/folders` и `GET /api/contacts?folder_id=...` вернул `204`. Формы отправляют только `name`, `phone`, `email` и `note`; `folder_id`, server-поля и выдуманные поля не отправляются.
 - Исходники backend и контракты остальных ресурсов в этом репозитории недоступны; контракт `PATCH /api/users/me` не проверен, поэтому редактирование профиля не добавлялось.
 - Нельзя придумывать URL для debts, contacts, folders, payments, users, archive и других ресурсов.
 - Не создавать mock backend, базу данных или фейковые хуки. Временные UI-данные для визуального каркаса допустимы только в `src/mocks/mockData.ts` и не должны выдаваться за данные backend.
@@ -239,6 +240,11 @@ src/
 35. При любом исходе logout локальная сессия завершается: refreshToken удаляется, вызываются `clearCredentials()` и `baseApi.util.resetApiState()`, пользователь перенаправляется на `/login`. При ошибке сервера показывается toast, который не утверждает, что токен отозван.
 36. Страница `/profile` получает данные только через `GET /api/users/me`; редактирование имени не добавлено без проверенного контракта `PATCH /api/users/me`.
 37. Полные `npm run lint`, `npm run typecheck` и `npm run build` остаются заблокированными посторонними незакоммиченными файлами по явному решению владельца; для нового кода выполнены targeted ESLint/targeted TypeScript и `npx vite build`.
+38. CRUDcontacts построен на `baseApi.injectEndpoints` с `tagTypes: ['Contact']`; list и detail tags инвалидируются после create/update/delete.
+39. Add/Edit формы используют RHF + Zod + `Field`; источник сообщений валидации — `createContactSchema(t)` в `src/features/contacts/contactsSchema.ts`.
+40. Delete подтверждается через shadcn `AlertDialog`; успех и ошибки mutations показываются через уже подключённый `sonner`.
+41. Папка не добавлялась в форму: endpoint `GET /api/folders` подтверждён, но формат ответа и правила выбора папки не изучены, поэтому `folder_id` не отправляется.
+42. Реальные POST/PATCH/DELETE не выполнялись: нет подготовленных тестовых данных и разрешения владельца.
 
 ## 13. Статус проверок
 
@@ -270,6 +276,15 @@ src/
 - `OPTIONS http://localhost:4000/api/auth/logout` — `HTTP 204`; `GET http://localhost:4000/api/users/me` без токена — `HTTP 401`; `GET /health` — `HTTP 200`.
 - Полные `npm run lint`, `npm run typecheck`, `npm run build` по-прежнему блокируются незакоммиченными `contactsSlice.ts`, `LoginPage.tsx`, `RegisterPage.tsx` и `authApi.ts`; посторонние файлы не изменялись по решению владельца.
 - Браузерная проверка dropdown, клавиатуры, повторного логина и восстановления сессии после перезагрузки требует ручного тестирования с реальными учётными данными.
+
+Проверки этапа CRUDcontacts:
+
+- `OPTIONS` для CRUDcontacts, `GET /api/folders` и фильтра `folder_id` — `HTTP 204`; мутации без тестовых данных не выполнялись.
+- Targeted `npx tsc -p C:/Users/User/AppData/Local/Temp/opencode/tsconfig.contacts-crud.json --pretty false` — успешно.
+- Targeted `npx eslint` для `baseApi.ts`, `contactsApi.ts`, `contactsSchema.ts`, `ContactsPage.tsx` и `i18n/index.ts` — успешно.
+- `npx vite build` — успешно, только warning о размере JS-чанка.
+- Dev-сервер на `127.0.0.1:4193` — `HTTP 200` для `/contacts`; лог Vite без ошибок.
+- Полные `npm run lint`, `npm run typecheck`, `npm run build` — заблокированы теми же посторонними файлами; новых ошибок в файлах CRUDcontacts нет.
 
 ## 14. Команды
 
