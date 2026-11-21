@@ -1,8 +1,14 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useTranslation } from 'react-i18next'
-import { useForm } from 'react-hook-form'
-import { Mail, Pencil, Phone, Plus, Trash2 } from 'lucide-react'
+import { useForm, type SubmitHandler } from 'react-hook-form'
+import {
+  Mail,
+  Pencil,
+  Phone,
+  Plus,
+  Trash2,
+} from 'lucide-react'
 import { toast } from 'sonner'
 
 import {
@@ -54,19 +60,13 @@ import {
 } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 
-type DialogMode = 'add' | 'edit' | null
-
-function toNullable(value: string): string | null {
-  const normalized = value.trim()
-
-  return normalized ? normalized : null
-}
-
 export default function ContactsPage() {
   const { t } = useTranslation()
 
-  const [dialogMode, setDialogMode] = useState<DialogMode>(null)
-  const [editingContact, setEditingContact] = useState<Contact | null>(null)
+  const [open, setOpen] = useState(false)
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [emailRequired, setEmailRequired] = useState(false)
+  const [saveError, setSaveError] = useState(false)
   const [deletingContact, setDeletingContact] = useState<Contact | null>(null)
   const [search, setSearch] = useState('')
 
@@ -82,8 +82,11 @@ export default function ContactsPage() {
   const [updateContact, { isLoading: isUpdating }] = useUpdateContactMutation()
   const [deleteContact, { isLoading: isDeleting }] = useDeleteContactMutation()
 
-  const form = useForm<ContactFormValues>({
-    resolver: zodResolver(createContactSchema(t)),
+  const {
+    reset, setValue, register, handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<ContactFormValues>({
+    resolver: zodResolver(createContactSchema(t, emailRequired)),
     defaultValues: {
       name: '',
       phone: '',
@@ -91,19 +94,6 @@ export default function ContactsPage() {
       note: '',
     },
   })
-
-  const { errors } = form.formState
-
-  useEffect(() => {
-    if (dialogMode === null) return
-
-    form.reset({
-      name: editingContact?.name ?? '',
-      phone: editingContact?.phone ?? '',
-      email: editingContact?.email ?? '',
-      note: editingContact?.note ?? '',
-    })
-  }, [dialogMode, editingContact, form])
 
   const filteredContacts = contacts.filter((contact) => {
     const query = search.trim().toLowerCase()
@@ -115,48 +105,66 @@ export default function ContactsPage() {
     )
   })
 
-  const isSaving = isCreating || isUpdating
+  const isSaving = isCreating || isUpdating || isSubmitting
 
   function handleOpenAdd() {
-    setEditingContact(null)
-    setDialogMode('add')
+    setEditingId(null)
+    setEmailRequired(false)
+    setSaveError(false)
+    reset()
+    setOpen(true)
   }
 
   function handleOpenEdit(contact: Contact) {
-    setEditingContact(contact)
-    setDialogMode('edit')
+    setEditingId(contact.id)
+    setEmailRequired(Boolean(contact.email))
+    setSaveError(false)
+    reset()
+    setValue('name', contact.name)
+    setValue('phone', contact.phone ?? '')
+    setValue('email', contact.email ?? '')
+    setValue('note', contact.note ?? '')
+    setOpen(true)
   }
 
   function handleCloseDialog() {
-    setDialogMode(null)
-    setEditingContact(null)
+    if (isSaving) return
+    setOpen(false)
+    setEditingId(null)
+    setSaveError(false)
+    reset()
   }
 
-  async function handleSubmitForm(values: ContactFormValues) {
+  const onSubmit: SubmitHandler<ContactFormValues> = async (values) => {
+    if (isCreating || isUpdating) return
+    setSaveError(false)
     const payload = {
-      name: values.name.trim(),
-      phone: toNullable(values.phone),
-      email: toNullable(values.email),
-      note: toNullable(values.note),
+      name: values.name,
+      phone: values.phone,
+      email: values.email || undefined,
+      note: values.note,
     }
 
     try {
-      if (dialogMode === 'edit' && editingContact) {
-        await updateContact({ id: editingContact.id, ...payload }).unwrap()
+      if (editingId !== null) {
+        await updateContact({ id: editingId, ...payload }).unwrap()
         toast.success(t('pages.contacts.messages.updated'))
       } else {
         await createContact(payload).unwrap()
         toast.success(t('pages.contacts.messages.created'))
       }
 
-      handleCloseDialog()
+      setOpen(false)
+      setEditingId(null)
+      reset()
     } catch {
+      setSaveError(true)
       toast.error(t('pages.contacts.messages.saveError'))
     }
   }
 
   async function handleDelete() {
-    if (!deletingContact) return
+    if (!deletingContact || isDeleting) return
 
     try {
       await deleteContact(deletingContact.id).unwrap()
@@ -186,6 +194,7 @@ export default function ContactsPage() {
           value={search}
           onChange={(event) => setSearch(event.target.value)}
           placeholder={t('pages.contacts.searchPlaceholder')}
+          aria-label={t('pages.contacts.searchPlaceholder')}
           className="h-10 min-w-0 flex-1"
         />
 
@@ -334,27 +343,28 @@ export default function ContactsPage() {
       )}
 
       <Dialog
-        open={dialogMode !== null}
-        onOpenChange={(open) => {
-          if (!open && !isSaving) handleCloseDialog()
+        open={open}
+        onOpenChange={(value) => {
+          if (!value) handleCloseDialog()
         }}
       >
-        <DialogContent className="sm:max-w-lg">
+        <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-w-lg" showCloseButton={!isSaving}>
           <DialogHeader>
             <DialogTitle>
-              {dialogMode === 'edit'
+              {editingId !== null
                 ? t('pages.contacts.editTitle')
                 : t('pages.contacts.addTitle')}
             </DialogTitle>
 
             <DialogDescription>
-              {dialogMode === 'edit'
+              {editingId !== null
                 ? t('pages.contacts.editDescription')
                 : t('pages.contacts.addDescription')}
             </DialogDescription>
           </DialogHeader>
 
-          <form onSubmit={form.handleSubmit(handleSubmitForm)}>
+          <form noValidate onSubmit={handleSubmit(onSubmit)}>
+            <fieldset disabled={isSaving}>
             <FieldGroup>
               <Field data-invalid={Boolean(errors.name)}>
                 <FieldLabel htmlFor="contact-name">
@@ -363,7 +373,7 @@ export default function ContactsPage() {
                 <Input
                   id="contact-name"
                   aria-invalid={Boolean(errors.name)}
-                  {...form.register('name')}
+                  {...register('name')}
                 />
                 <FieldError errors={errors.name ? [errors.name] : undefined} />
               </Field>
@@ -375,7 +385,7 @@ export default function ContactsPage() {
                 <Input
                   id="contact-phone"
                   aria-invalid={Boolean(errors.phone)}
-                  {...form.register('phone')}
+                  {...register('phone')}
                 />
                 <FieldError
                   errors={errors.phone ? [errors.phone] : undefined}
@@ -390,11 +400,12 @@ export default function ContactsPage() {
                   id="contact-email"
                   type="email"
                   aria-invalid={Boolean(errors.email)}
-                  {...form.register('email')}
+                  {...register('email')}
                 />
                 <FieldError
                   errors={errors.email ? [errors.email] : undefined}
                 />
+                {emailRequired && <p className="text-xs text-muted-foreground">{t('pages.contacts.emailHint')}</p>}
               </Field>
 
               <Field data-invalid={Boolean(errors.note)}>
@@ -404,11 +415,14 @@ export default function ContactsPage() {
                 <Input
                   id="contact-note"
                   aria-invalid={Boolean(errors.note)}
-                  {...form.register('note')}
+                  {...register('note')}
                 />
                 <FieldError errors={errors.note ? [errors.note] : undefined} />
               </Field>
             </FieldGroup>
+            </fieldset>
+
+            {saveError && <p role="alert" className="mt-4 text-sm text-destructive">{t('pages.contacts.messages.saveError')}</p>}
 
             <DialogFooter className="mt-6">
               <Button

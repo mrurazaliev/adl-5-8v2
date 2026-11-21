@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { ChevronDown, LogOut, UserRound } from 'lucide-react'
 import { toast } from 'sonner'
@@ -19,6 +20,7 @@ import { useLogoutMutation } from '@/features/auth/authApi'
 import { clearCredentials } from '@/features/auth/authSlice'
 
 export function ProfileMenu() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const dispatch = useAppDispatch()
   const user = useAppSelector((state) => state.auth.user)
@@ -26,7 +28,7 @@ export function ProfileMenu() {
   const [isLoggingOut, setIsLoggingOut] = useState(false)
   const [logout, { isLoading }] = useLogoutMutation()
 
-  const displayName = user?.name ?? 'Пользователь'
+  const displayName = user?.name ?? t('pages.profile.user')
   const initial = user?.name?.charAt(0).toUpperCase() ?? '?'
   const isBusy = isLoggingOut || isLoading
 
@@ -45,7 +47,7 @@ export function ProfileMenu() {
           await logout({ refreshToken }).unwrap()
         } catch {
           toast.error(
-            'Не удалось сообщить серверу о выходе. Локальная сессия завершена.',
+            t('pages.profile.logoutError'),
           )
         }
       }
@@ -67,7 +69,7 @@ export function ProfileMenu() {
           variant="ghost"
           size="sm"
           className="h-9 gap-2 rounded-lg px-1.5 text-sm hover:bg-accent hover:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring sm:px-2"
-          aria-label="Меню пользователя"
+          aria-label={t('pages.profile.menu')}
         >
           <Avatar className="size-7">
             <AvatarFallback className="bg-primary/10 text-xs font-semibold text-primary">
@@ -100,7 +102,7 @@ export function ProfileMenu() {
             </p>
 
             <p className="truncate text-xs text-muted-foreground">
-              {user?.email ?? 'Email недоступен'}
+              {user?.email ?? t('pages.profile.emailUnavailable')}
             </p>
           </div>
         </DropdownMenuLabel>
@@ -112,7 +114,7 @@ export function ProfileMenu() {
           onSelect={() => navigate('/profile')}
         >
           <UserRound className="size-4" />
-          Мой профиль
+          {t('pages.profile.title')}
         </DropdownMenuItem>
 
         <DropdownMenuItem
@@ -122,7 +124,7 @@ export function ProfileMenu() {
           onSelect={() => void handleLogout()}
         >
           <LogOut className="size-4" />
-          {isBusy ? 'Выход...' : 'Выйти из аккаунта'}
+          {t(isBusy ? 'pages.profile.loggingOut' : 'pages.profile.logout')}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

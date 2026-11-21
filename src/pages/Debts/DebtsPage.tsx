@@ -35,7 +35,8 @@ export default function DebtsPage() {
   const [viewingId, setViewingId] = useState<string | null>(null)
   const [paymentSaving, setPaymentSaving] = useState(false)
   const [filters, setFilters] = useState<DebtFilters>({})
-  const { currentData: debts = [], isFetching, isError, refetch } = useGetDebtsQuery(filters)
+  const { currentData: allDebts = [], isFetching, isError, refetch } = useGetDebtsQuery(filters)
+  const debts = allDebts.filter((debt) => debt.status === 'pending' || debt.status === 'partial')
   const {
     data: contacts = [], isLoading: contactsLoading, isError: contactsError,
     refetch: refetchContacts,
@@ -144,7 +145,7 @@ export default function DebtsPage() {
               <SelectTrigger className="w-full" aria-label={t('common.status')}><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">{t('common.all')}</SelectItem>
-                {(['pending', 'partial', 'paid'] as const).map((status) => <SelectItem key={status} value={status}>{t(`pages.debts.${status}`)}</SelectItem>)}
+                {(['pending', 'partial'] as const).map((status) => <SelectItem key={status} value={status}>{t(`pages.debts.${status}`)}</SelectItem>)}
               </SelectContent>
             </Select>
             <Select value={filters.contact_id ?? 'all'} disabled={contactsUnavailable} onValueChange={(value) => setFilters({ ...filters, contact_id: value === 'all' ? undefined : value })}>
@@ -272,7 +273,8 @@ export default function DebtsPage() {
             <dt className="text-muted-foreground">{t('pages.debts.due_date')}</dt><dd>{viewedDebt.due_date?.slice(0, 10) ?? '—'}</dd>
             <dt className="text-muted-foreground">{t('pages.debts.description')}</dt><dd className="min-w-0 whitespace-pre-wrap break-words">{viewedDebt.description || '—'}</dd>
           </dl>
-          <DebtPayments key={viewedDebt.id} debt={viewedDebt} disabled={detailsLoading || detailsError} onSavingChange={setPaymentSaving} />
+          {viewedDebt.status === 'paid' && <p role="status" className="rounded-lg bg-success/10 p-3 text-sm text-success">{t('pages.debts.archivedNotice')}</p>}
+          <DebtPayments key={viewedDebt.id} debt={viewedDebt} disabled={detailsLoading || detailsError} readOnly={viewedDebt.status === 'paid'} onSavingChange={setPaymentSaving} />
           </>}
           <DialogFooter><Button variant="outline" disabled={paymentSaving} onClick={() => setViewingId(null)}>{t('pages.debts.close')}</Button></DialogFooter>
         </DialogContent>

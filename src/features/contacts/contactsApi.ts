@@ -17,6 +17,7 @@ export interface ContactPayload {
   phone?: string | null
   email?: string | null
   note?: string | null
+  folder_id?: string | null
 }
 
 export const contactsApi = baseApi.injectEndpoints({

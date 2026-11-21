@@ -1,7 +1,9 @@
 import { useAppSelector } from '@/app/hooks'
+import { useTranslation } from 'react-i18next'
 import { useGetMeQuery } from '@/features/auth/userApi'
 
 export default function AuthTest() {
+  const { t } = useTranslation()
   const token = useAppSelector((state) => state.auth.accessToken)
 
   const { data, isLoading, isError } = useGetMeQuery(undefined, {
@@ -9,16 +11,16 @@ export default function AuthTest() {
   })
 
   if (!token) {
-    return <p>Пользователь не авторизован</p>
+    return <p>{t('auth.unauthenticated')}</p>
   }
 
   if (isLoading) {
-    return <p>Загрузка пользователя...</p>
+    return <p>{t('auth.userLoading')}</p>
   }
 
   if (isError) {
-    return <p>Ошибка получения пользователя</p>
+    return <p>{t('auth.userError')}</p>
   }
 
-  return <p>Добро пожаловать, {data?.name}!</p>
+  return <p>{t('auth.welcome', { name: data?.name ?? '' })}</p>
 }

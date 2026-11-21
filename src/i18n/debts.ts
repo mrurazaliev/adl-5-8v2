@@ -3,7 +3,8 @@ import { debtCreationTranslations } from '@/i18n/debtCreation'
 export const debtsTranslations = {
   ru: {
     creation: debtCreationTranslations.ru,
-    title: 'Долги', subtitle: 'Долговые записи и обязательства',
+    title: 'Долги', subtitle: 'Активные долги: ожидают оплаты или частично погашены',
+    archivedNotice: 'Сервер пометил долг как погашенный. Он теперь доступен в Архиве; история платежей сохранена.',
     contact: 'Контакт', direction: 'Направление', amount: 'Сумма', currency: 'Валюта',
     description: 'Описание', due_date: 'Срок возврата', actions: 'Действия',
     they_owe_me: 'Мне должны', i_owe_them: 'Я должен',
@@ -29,7 +30,8 @@ export const debtsTranslations = {
   },
   tj: {
     creation: debtCreationTranslations.tj,
-    title: 'Қарзҳо', subtitle: 'Сабтҳои қарз ва уҳдадориҳо',
+    title: 'Қарзҳо', subtitle: 'Қарзҳои фаъол: интизори пардохт ё қисман пардохтшуда',
+    archivedNotice: 'Сервер қарзро пардохтшуда нишон дод. Он ҳоло дар Бойгонӣ дастрас аст; таърихи пардохтҳо нигоҳ дошта шуд.',
     contact: 'Тамос', direction: 'Самт', amount: 'Маблағ', currency: 'Асъор',
     description: 'Тавсиф', due_date: 'Муҳлати баргардонидан', actions: 'Амалҳо',
     they_owe_me: 'Аз ман қарздоранд', i_owe_them: 'Ман қарздорам',
@@ -55,7 +57,8 @@ export const debtsTranslations = {
   },
   en: {
     creation: debtCreationTranslations.en,
-    title: 'Debts', subtitle: 'Debt records and obligations',
+    title: 'Debts', subtitle: 'Active debts: pending or partially paid',
+    archivedNotice: 'The server marked this debt as paid. It is now available in Archive; payment history is preserved.',
     contact: 'Contact', direction: 'Direction', amount: 'Amount', currency: 'Currency',
     description: 'Description', due_date: 'Due date', actions: 'Actions',
     they_owe_me: 'They owe me', i_owe_them: 'I owe them',

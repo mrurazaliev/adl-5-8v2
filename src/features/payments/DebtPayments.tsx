@@ -16,13 +16,15 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 
 interface DebtPaymentsProps {
   debt: Debt
-  disabled: boolean
-  onSavingChange: (saving: boolean) => void
+  disabled?: boolean
+  readOnly?: boolean
+  initialOpen?: boolean
+  onSavingChange?: (saving: boolean) => void
 }
 
-export function DebtPayments({ debt, disabled, onSavingChange }: DebtPaymentsProps) {
+export function DebtPayments({ debt, disabled = false, readOnly = false, initialOpen = false, onSavingChange }: DebtPaymentsProps) {
   const { t, i18n } = useTranslation()
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(initialOpen)
   const {
     currentData: payments = [], isFetching, isError, refetch,
   } = useGetPaymentsQuery(debt.id, { skip: !open })
@@ -37,8 +39,8 @@ export function DebtPayments({ debt, disabled, onSavingChange }: DebtPaymentsPro
   const isSaving = isAdding || isSubmitting
 
   const onSubmit: SubmitHandler<PaymentFormValues> = async (data) => {
-    if (isAdding || disabled) return
-    onSavingChange(true)
+    if (isAdding || disabled || readOnly || debt.status === 'paid') return
+    onSavingChange?.(true)
     try {
       await addPayment({
         debtId: debt.id,
@@ -51,7 +53,7 @@ export function DebtPayments({ debt, disabled, onSavingChange }: DebtPaymentsPro
     } catch {
       toast.error(t('pages.payments.messages.saveError'))
     } finally {
-      onSavingChange(false)
+      onSavingChange?.(false)
     }
   }
 
@@ -111,7 +113,7 @@ export function DebtPayments({ debt, disabled, onSavingChange }: DebtPaymentsPro
           </CardContent>
         </Card>
 
-        <Card className="border-border/70 shadow-sm">
+        {!readOnly && debt.status !== 'paid' && <Card className="border-border/70 shadow-sm">
           <CardHeader><CardTitle>{t('pages.payments.addTitle')}</CardTitle></CardHeader>
           <CardContent>
             <form noValidate onSubmit={handleSubmit(onSubmit)}>
@@ -140,7 +142,7 @@ export function DebtPayments({ debt, disabled, onSavingChange }: DebtPaymentsPro
               </Button>
             </form>
           </CardContent>
-        </Card>
+        </Card>}
       </div>}
     </section>
   )

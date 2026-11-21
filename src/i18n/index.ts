@@ -1,3 +1,4 @@
+import { interfaceTranslations } from '@/i18n/interface'
 import { dashboardTranslations } from '@/i18n/dashboard'
 import { paymentsTranslations } from '@/i18n/payments'
 import { debtsTranslations } from '@/i18n/debts'
@@ -43,6 +44,7 @@ const resources = {
         },
       },
       auth: {
+        ...interfaceTranslations.ru.auth,
         login: 'Войти',
         register: 'Регистрация',
         registerAction: 'Зарегистрироваться',
@@ -82,6 +84,7 @@ const resources = {
         archive: 'Архив',
       },
       common: {
+        ...interfaceTranslations.ru.common,
         search: 'Поиск',
         filters: 'Фильтры',
         add: 'Добавить',
@@ -94,8 +97,9 @@ const resources = {
         status: 'Статус',
       },
       pages: {
+        profile: interfaceTranslations.ru.profile,
         dashboard: {
-          title: 'Дашборд',
+          title: 'Дешборд',
           subtitle: 'Визуальный обзор финансовых показателей',
           stats: 'Ключевые показатели',
           trend: 'Финансовая статистика',
@@ -158,10 +162,7 @@ const resources = {
             noteMax: 'Заметка не должна превышать 500 символов',
           },
         },
-        folders: {
-          title: 'Папки',
-          subtitle: 'Категории для организации данных',
-        },
+        folders: interfaceTranslations.ru.folders,
         payments: paymentsTranslations.ru,
         users: {
           title: 'Пользователи',
@@ -211,6 +212,7 @@ const resources = {
         },
       },
       auth: {
+        ...interfaceTranslations.tj.auth,
         login: 'Ворид шудан',
         register: 'Бақайд гирифтан',
         registerAction: 'Эҷоди ҳисоб',
@@ -250,6 +252,7 @@ const resources = {
         archive: 'Бойгонӣ',
       },
       common: {
+        ...interfaceTranslations.tj.common,
         search: 'Ҷустуҷӯ',
         filters: 'Филтрҳо',
         add: 'Илова',
@@ -262,6 +265,7 @@ const resources = {
         status: 'Вазъият',
       },
       pages: {
+        profile: interfaceTranslations.tj.profile,
         dashboard: {
           title: 'Саҳифаи асосӣ',
           subtitle: 'Намоиши умумии нишондиҳандаҳои молиявӣ',
@@ -326,10 +330,7 @@ const resources = {
             noteMax: 'Қайд набояд аз 500 аломат зиёд бошад',
           },
         },
-        folders: {
-          title: 'Папкаҳо',
-          subtitle: 'Категорияҳо барои ташкили маълумот',
-        },
+        folders: interfaceTranslations.tj.folders,
         payments: paymentsTranslations.tj,
         users: {
           title: 'Корбарон',
@@ -378,6 +379,7 @@ const resources = {
         },
       },
       auth: {
+        ...interfaceTranslations.en.auth,
         login: 'Sign in',
         register: 'Register',
         registerAction: 'Create account',
@@ -415,6 +417,7 @@ const resources = {
         archive: 'Archive',
       },
       common: {
+        ...interfaceTranslations.en.common,
         search: 'Search',
         filters: 'Filters',
         add: 'Add',
@@ -427,6 +430,7 @@ const resources = {
         status: 'Status',
       },
       pages: {
+        profile: interfaceTranslations.en.profile,
         dashboard: {
           title: 'Dashboard',
           subtitle: 'Visual overview of financial metrics',
@@ -491,10 +495,7 @@ const resources = {
             noteMax: 'Note must be 500 characters or fewer',
           },
         },
-        folders: {
-          title: 'Folders',
-          subtitle: 'Categories for organizing data',
-        },
+        folders: interfaceTranslations.en.folders,
         payments: paymentsTranslations.en,
         users: {
           title: 'Users',

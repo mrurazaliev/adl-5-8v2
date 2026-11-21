@@ -1,4 +1,5 @@
 import { Plus, Search, SlidersHorizontal } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -32,6 +33,7 @@ export function FilterBar({
   actionLabel,
   onAction,
 }: FilterBarProps) {
+  const { t } = useTranslation()
   return (
     <div className="mb-5 flex flex-col gap-3 rounded-2xl border border-border/70 bg-card p-3 shadow-sm lg:flex-row lg:items-center">
       <div className="relative w-full lg:max-w-sm">
@@ -73,10 +75,10 @@ export function FilterBar({
           variant="outline"
           size="sm"
           disabled
-          title="Фильтры будут подключены после backend"
+          title={t('common.filtersUnavailable')}
         >
           <SlidersHorizontal />
-          Фильтры
+          {t('common.filters')}
         </Button>
         {actionLabel && onAction ? (
           <Button type="button" size="sm" onClick={onAction}>

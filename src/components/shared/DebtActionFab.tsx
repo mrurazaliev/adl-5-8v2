@@ -122,7 +122,7 @@ export function DebtActionFab() {
         }}
         title={activeAction ? t(activeAction.labelKey) : ''}
         description={activeAction ? t(activeAction.descriptionKey) : ''}
-        saveLabel="Сохранить"
+        saveLabel={t('common.save')}
       />
     </>
   )

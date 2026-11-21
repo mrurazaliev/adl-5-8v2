@@ -2,7 +2,7 @@ import { z } from 'zod'
 
 type Translate = (key: string) => string
 
-export function createContactSchema(t: Translate) {
+export function createContactSchema(t: Translate, emailRequired = false) {
   return z.object({
     name: z
       .string()
@@ -12,7 +12,7 @@ export function createContactSchema(t: Translate) {
     phone: z
       .string()
       .trim()
-      .max(30, t('pages.contacts.validation.phoneMax'))
+      .max(40, t('pages.contacts.validation.phoneMax'))
       .refine(
         (value) => value === '' || /^[+\d\s()-]*$/.test(value),
         t('pages.contacts.validation.phoneInvalid'),
@@ -20,15 +20,16 @@ export function createContactSchema(t: Translate) {
     email: z
       .string()
       .trim()
-      .max(120, t('pages.contacts.validation.emailMax'))
       .refine(
         (value) => value === '' || z.email().safeParse(value).success,
         t('pages.contacts.validation.emailInvalid'),
-      ),
+      )
+      .refine((value) => !emailRequired || value !== '', t('pages.contacts.validation.emailClearUnsupported')),
     note: z
       .string()
       .trim()
-      .max(500, t('pages.contacts.validation.noteMax')),
+      .max(1000, t('pages.contacts.validation.noteMax')),
+    folder_id: z.uuid(t('pages.contacts.validation.folderInvalid')).optional(),
   })
 }
 

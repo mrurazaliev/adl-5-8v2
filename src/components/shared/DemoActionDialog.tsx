@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -26,17 +27,17 @@ interface DemoActionDialogProps {
   children?: ReactNode
 }
 
-const defaultFields = ['Параметр 01', 'Параметр 02', 'Параметр 03']
-
 export function DemoActionDialog({
   open,
   onOpenChange,
   title,
   description,
-  fields = defaultFields,
-  saveLabel = 'Сохранение недоступно',
+  fields,
+  saveLabel,
   children,
 }: DemoActionDialogProps) {
+  const { t } = useTranslation()
+  const labels = fields ?? [1, 2, 3].map((number) => t('common.demoField', { number }))
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-lg">
@@ -48,19 +49,18 @@ export function DemoActionDialog({
         <FieldGroup>
           {children ?? (
             <>
-              {fields.map((label, index) => (
+              {labels.map((label, index) => (
                 <Field key={label}>
                   <FieldLabel htmlFor={`demo-field-${index}`}>{label}</FieldLabel>
                   <Input
                     id={`demo-field-${index}`}
-                    placeholder="Не заполняется в демо"
+                    placeholder={t('common.demoPlaceholder')}
                     disabled
                   />
                 </Field>
               ))}
               <FieldDescription>
-                Состав полей и правила сохранения будут определены после
-                подключения backend.
+                {t('common.demoDescription')}
               </FieldDescription>
             </>
           )}
@@ -72,10 +72,10 @@ export function DemoActionDialog({
             variant="outline"
             onClick={() => onOpenChange(false)}
           >
-            Отмена
+            {t('common.cancel')}
           </Button>
           <Button type="button" disabled>
-            {saveLabel}
+            {saveLabel ?? t('common.saveUnavailable')}
           </Button>
         </DialogFooter>
       </DialogContent>

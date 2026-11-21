@@ -1,153 +1,102 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Eye, RotateCcw } from 'lucide-react'
-import { DemoActionDialog } from '@/components/shared/DemoActionDialog'
+import { Eye } from 'lucide-react'
+import { useGetContactsQuery } from '@/features/contacts/contactsApi'
+import { useGetDebtsQuery, useGetDebtByIdQuery } from '@/features/debts/debtsApi'
+import { DebtPayments } from '@/features/payments/DebtPayments'
 import { EmptyState } from '@/components/shared/EmptyState'
-import { FilterBar } from '@/components/shared/FilterBar'
 import { PageHeader } from '@/components/shared/PageHeader'
-import { StatusBadge } from '@/components/shared/StatusBadge'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
-import { archive } from '@/mocks/mockData'
-
-type DialogMode = 'view' | 'restore' | null
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 
 export default function ArchivePage() {
-  const { t } = useTranslation()
-  const [dialogMode, setDialogMode] = useState<DialogMode>(null)
+  const { t, i18n } = useTranslation()
+  const [viewingId, setViewingId] = useState<string | null>(null)
+  const { data: debts = [], isLoading, isFetching, isError, refetch } = useGetDebtsQuery({})
+  const { data: contacts = [], isError: contactsError, refetch: refetchContacts } = useGetContactsQuery()
+  const { currentData: viewedDebt, isFetching: detailsLoading, isError: detailsError, refetch: refetchDetails } = useGetDebtByIdQuery(viewingId ?? '', { skip: viewingId === null })
+  const archivedDebts = debts.filter((debt) => debt.status === 'paid')
+  const locale = i18n.language === 'tj' ? 'tg-TJ' : i18n.language
+
+  function contactName(id: string) {
+    return contacts.find((contact) => contact.id === id)?.name ?? t('pages.archive.unknownContact', { id })
+  }
+
+  function formatDate(value: string) {
+    const date = new Date(value)
+    return Number.isFinite(date.getTime()) ? date.toLocaleDateString(locale) : t('pages.archive.unavailable')
+  }
 
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title={t('pages.archive.title')}
-        description={t('pages.archive.subtitle')}
-      />
-
-      <Card className="border-border/70 shadow-sm">
+    <div className="min-w-0 space-y-6">
+      <PageHeader title={t('pages.archive.title')} description={t('pages.archive.subtitle')} />
+      <Card className="min-w-0 border-border/70 shadow-sm">
         <CardHeader>
           <CardTitle>{t('pages.archive.title')}</CardTitle>
-          <CardDescription>
-            Действия с архивными записями показаны в демо-режиме
-          </CardDescription>
+          <CardDescription>{t('pages.archive.description')}</CardDescription>
+          <p className="text-xs leading-relaxed text-muted-foreground">{t('pages.archive.statusHint')}</p>
         </CardHeader>
-        <CardContent>
-          <FilterBar
-            searchPlaceholder={`${t('common.search')}: ${t('nav.archive')}`}
-            filters={[
-              {
-                label: 'Тип записи',
-                options: [
-                  { value: 'all', label: t('common.all') },
-                  { value: 'debt', label: 'Долг' },
-                  { value: 'payment', label: 'Платёж' },
-                  { value: 'folder', label: 'Папка' },
-                  { value: 'user', label: 'Пользователь' },
-                ],
-              },
-            ]}
-          />
-
-          <Tabs defaultValue="all">
-            <div className="no-scrollbar mb-4 max-w-full overflow-x-auto">
-              <TabsList>
-                <TabsTrigger value="all">{t('common.all')}</TabsTrigger>
-                <TabsTrigger value="empty">Пустой список</TabsTrigger>
-              </TabsList>
-            </div>
-
-            <TabsContent value="all" className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>ID</TableHead>
-                    <TableHead>Запись</TableHead>
-                    <TableHead>Тип</TableHead>
-                    <TableHead>Дата архивации</TableHead>
-                    <TableHead>Причина</TableHead>
-                    <TableHead>{t('common.status')}</TableHead>
-                    <TableHead className="text-right">Действия</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {archive.map((row) => (
-                    <TableRow key={row.id}>
-                      <TableCell className="font-mono text-xs">{row.id}</TableCell>
-                      <TableCell className="font-medium whitespace-nowrap">
-                        {row.title}
-                      </TableCell>
-                      <TableCell className="whitespace-nowrap">{row.type}</TableCell>
-                      <TableCell className="whitespace-nowrap">
-                        {row.archivedAt}
-                      </TableCell>
-                      <TableCell className="whitespace-nowrap">{row.reason}</TableCell>
-                      <TableCell>
-                        <StatusBadge status={row.status} />
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex justify-end gap-1">
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon-sm"
-                            aria-label={`${t('common.view')} ${row.id}`}
-                            onClick={() => setDialogMode('view')}
-                          >
-                            <Eye />
-                          </Button>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon-sm"
-                            aria-label={`${t('common.restore')} ${row.id}`}
-                            onClick={() => setDialogMode('restore')}
-                          >
-                            <RotateCcw />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TabsContent>
-
-            <TabsContent value="empty">
-              <EmptyState
-                title="Архив пуст"
-                description="Здесь появится сообщение, когда в архиве не будет записей."
-              />
-            </TabsContent>
-          </Tabs>
+        <CardContent className="space-y-4">
+          {contactsError && <div role="alert" className="space-y-2 text-sm">
+            <p>{t('pages.archive.contactsError')}</p>
+            <Button type="button" variant="outline" onClick={() => void refetchContacts()}>{t('pages.archive.retry')}</Button>
+          </div>}
+          {isLoading && <div role="status" aria-label={t('pages.archive.loading')} className="space-y-3">
+            {[0, 1, 2].map((item) => <Skeleton key={item} className="h-14 w-full" />)}
+          </div>}
+          {isError && <div role="alert" className="space-y-3 py-8 text-center">
+            <p>{t('pages.archive.loadError')}</p>
+            <Button type="button" variant="outline" disabled={isFetching} onClick={() => void refetch()}>{t('pages.archive.retry')}</Button>
+          </div>}
+          {!isLoading && !isError && archivedDebts.length === 0 && <EmptyState title={t('pages.archive.emptyTitle')} description={t('pages.archive.emptyHint')} />}
+          {!isError && archivedDebts.length > 0 && <div className="overflow-x-auto" aria-busy={isFetching}>
+            <Table>
+              <TableHeader><TableRow>
+                <TableHead>{t('pages.archive.contact')}</TableHead>
+                <TableHead>{t('pages.archive.amount')}</TableHead>
+                <TableHead>{t('pages.archive.direction')}</TableHead>
+                <TableHead>{t('pages.archive.status')}</TableHead>
+                <TableHead>{t('pages.archive.createdAt')}</TableHead>
+                <TableHead className="text-right">{t('pages.archive.history')}</TableHead>
+              </TableRow></TableHeader>
+              <TableBody>{archivedDebts.map((debt) => <TableRow key={debt.id}>
+                <TableCell className="font-medium">{contactName(debt.contact_id)}</TableCell>
+                <TableCell className="whitespace-nowrap tabular-nums">{debt.amount} {debt.currency}</TableCell>
+                <TableCell>{t(`pages.debts.${debt.direction}`)}</TableCell>
+                <TableCell><Badge variant="outline" className="bg-success/10 text-success">{t('pages.debts.paid')}</Badge></TableCell>
+                <TableCell className="whitespace-nowrap">{formatDate(debt.created_at)}</TableCell>
+                <TableCell className="text-right"><Button type="button" variant="ghost" size="icon-sm" aria-label={`${t('pages.archive.history')} ${debt.id}`} onClick={() => setViewingId(debt.id)}><Eye /></Button></TableCell>
+              </TableRow>)}</TableBody>
+            </Table>
+          </div>}
         </CardContent>
       </Card>
 
-      <DemoActionDialog
-        open={dialogMode !== null}
-        onOpenChange={(open) => {
-          if (!open) setDialogMode(null)
-        }}
-        title={
-          dialogMode === 'restore'
-            ? 'Восстановление записи'
-            : 'Просмотр архивной записи'
-        }
-        description="Действие показано как демо. Изменение данных появится после подключения backend."
-      />
+      <Dialog open={viewingId !== null} onOpenChange={(value) => { if (!value) setViewingId(null) }}>
+        <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-w-2xl">
+          <DialogHeader><DialogTitle>{t('pages.archive.detailsTitle')}</DialogTitle><DialogDescription>{t('pages.archive.description')}</DialogDescription></DialogHeader>
+          {detailsLoading && !viewedDebt && <Skeleton className="h-40 w-full" />}
+          {detailsError && <div role="alert" className="space-y-3">
+            <p>{t('pages.archive.detailsError')}</p>
+            <Button type="button" variant="outline" disabled={detailsLoading} onClick={() => void refetchDetails()}>{t('pages.archive.retry')}</Button>
+          </div>}
+          {!detailsError && viewedDebt && (viewedDebt.status === 'paid' ? <>
+            <dl className="grid grid-cols-[auto_1fr] gap-3 text-sm">
+              <dt className="text-muted-foreground">{t('pages.archive.contact')}</dt><dd className="min-w-0 break-words">{contactName(viewedDebt.contact_id)}</dd>
+              <dt className="text-muted-foreground">{t('pages.archive.amount')}</dt><dd>{viewedDebt.amount} {viewedDebt.currency}</dd>
+              <dt className="text-muted-foreground">{t('pages.archive.direction')}</dt><dd>{t(`pages.debts.${viewedDebt.direction}`)}</dd>
+              <dt className="text-muted-foreground">{t('pages.archive.status')}</dt><dd>{t('pages.debts.paid')}</dd>
+              <dt className="text-muted-foreground">{t('pages.archive.createdAt')}</dt><dd>{formatDate(viewedDebt.created_at)}</dd>
+            </dl>
+            <DebtPayments key={viewedDebt.id} debt={viewedDebt} readOnly initialOpen />
+          </> : <p role="status" className="text-sm text-muted-foreground">{t('pages.archive.noLongerPaid')}</p>)}
+          <DialogFooter><Button type="button" variant="outline" onClick={() => setViewingId(null)}>{t('pages.archive.close')}</Button></DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
