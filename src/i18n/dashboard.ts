@@ -2,6 +2,8 @@ import { monthlyDebtChartTranslations } from '@/i18n/monthlyDebtChart'
 
 export const dashboardTranslations = {
   ru: {
+    balanceLimitation: 'В списке долгов нет суммы погашений каждого долга. Сводка объединяет валюты, а исходная сумма частично погашенного долга не равна остатку. Поэтому достоверный чистый баланс по валютам сейчас недоступен.',
+    recentDebts: 'Последние долги',
     monthly: monthlyDebtChartTranslations.ru,
     title: 'Дашборд', subtitle: 'Долги, контакты и сроки возврата', stats: 'Финансовый обзор',
     owedToMe: 'Мне должны', iOwe: 'Я должен', netBalance: 'Чистый баланс',
@@ -22,6 +24,8 @@ export const dashboardTranslations = {
     manageDebts: 'Перейти к долгам', currencyUnavailable: 'Валюта не указана',
   },
   tj: {
+    balanceLimitation: 'Дар рӯйхати қарзҳо маблағи пардохти ҳар қарз нест. Хулоса асъорҳоро якҷо мекунад; маблағи ибтидоии қарзи қисман пардохтшуда бақия нест. Бақияи холиси боэътимод аз рӯи асъор ҳоло дастрас нест.',
+    recentDebts: 'Қарзҳои охирин',
     monthly: monthlyDebtChartTranslations.tj,
     title: 'Саҳифаи асосӣ', subtitle: 'Қарзҳо, тамосҳо ва муҳлатҳои баргардонӣ', stats: 'Шарҳи молиявӣ',
     owedToMe: 'Ба ман қарздоранд', iOwe: 'Ман қарздорам', netBalance: 'Бақияи холис',
@@ -42,6 +46,8 @@ export const dashboardTranslations = {
     manageDebts: 'Гузариш ба қарзҳо', currencyUnavailable: 'Асъор нишон дода нашудааст',
   },
   en: {
+    balanceLimitation: 'The debt list lacks the payment total for each debt. The summary combines currencies, and a partially paid debt’s original amount is not its remaining balance. Reliable per-currency net balances are currently unavailable.',
+    recentDebts: 'Recent debts',
     monthly: monthlyDebtChartTranslations.en,
     title: 'Dashboard', subtitle: 'Debts, contacts and due dates', stats: 'Financial overview',
     owedToMe: 'Owed to me', iOwe: 'I owe', netBalance: 'Net balance',

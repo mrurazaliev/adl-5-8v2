@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom'
 import { isValid, parseISO } from 'date-fns'
 import { ArrowRight, Plus } from 'lucide-react'
 import { CreateDebtDialog } from '@/features/debts/CreateDebtDialog'
+import RecentDebts from '@/features/dashboard/RecentDebts'
 import { useGetDashboardSummaryQuery } from '@/features/dashboard/dashboardApi'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { PageHeader } from '@/components/shared/PageHeader'
@@ -80,7 +81,7 @@ export default function DashboardPage() {
         <>
           <section aria-labelledby="dashboard-stats" className="space-y-3">
             <h2 id="dashboard-stats" className="text-sm font-semibold">{t('pages.dashboard.stats')}</h2>
-            <p className="max-w-3xl text-sm text-muted-foreground">{t('pages.dashboard.currencyNotice')}</p>
+            <p className="max-w-3xl text-sm text-muted-foreground">{t('pages.dashboard.balanceLimitation')}</p>
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
               {['owedToMe', 'iOwe', 'netBalance'].map((key) => (
                 <Card key={key} className="min-w-0 border-border/70 shadow-sm">
@@ -195,6 +196,7 @@ export default function DashboardPage() {
           </section>
       )}
 
+      <RecentDebts />
       <Button type="button" size="icon-lg" aria-label={t('pages.debts.addTitle')} onClick={() => setOpen(true)} className="fixed right-4 bottom-4 z-40 size-12 rounded-full shadow-xl sm:right-6 sm:bottom-6">
         <Plus className="size-5" />
       </Button>
