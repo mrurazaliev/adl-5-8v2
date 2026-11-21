@@ -21,11 +21,11 @@ const icons: Record<StatItem['icon'], LucideIcon> = {
 }
 
 const toneClasses: Record<StatusTone, string> = {
-  primary: 'bg-primary/10 text-primary dark:bg-primary/20',
+  primary: 'bg-primary/10 text-primary-light dark:bg-primary/20',
   success: 'bg-success/10 text-success dark:bg-success/20',
   warning: 'bg-warning/15 text-warning dark:bg-warning/20',
   danger: 'bg-danger/10 text-danger dark:bg-danger/20',
-  secondary: 'bg-secondary/10 text-secondary dark:bg-secondary/20',
+  secondary: 'bg-secondary text-secondary-foreground',
 }
 
 export function StatCard({ item }: StatCardProps) {
@@ -47,7 +47,7 @@ export function StatCard({ item }: StatCardProps) {
         </span>
       </CardHeader>
       <CardContent className="space-y-1">
-        <CardTitle className="text-2xl font-semibold tracking-tight sm:text-3xl">
+        <CardTitle className="text-[28px] font-extrabold tracking-tight tabular-nums sm:text-[32px]">
           {item.value}
         </CardTitle>
         <p className="text-xs text-muted-foreground">{item.note}</p>

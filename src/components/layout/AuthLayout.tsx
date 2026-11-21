@@ -3,9 +3,9 @@ import { useTranslation } from 'react-i18next'
 
 const sideGlowStyle = {
   backgroundImage: [
-    'radial-gradient(circle at 0% 0%, rgba(124, 58, 237, 0.14) 0%, transparent 42%)',
-    'radial-gradient(circle at 100% 0%, rgba(245, 158, 11, 0.08) 0%, transparent 38%)',
-    'radial-gradient(circle at 100% 100%, rgba(16, 185, 129, 0.12) 0%, transparent 42%)',
+    'radial-gradient(circle at 0% 0%, color-mix(in srgb, var(--primary) 28%, transparent) 0%, transparent 55%)',
+    'radial-gradient(circle at 100% 0%, color-mix(in srgb, var(--cyan) 14%, transparent) 0%, transparent 48%)',
+    'radial-gradient(circle at 100% 100%, color-mix(in srgb, var(--primary) 18%, transparent) 0%, transparent 55%)',
   ].join(', '),
 }
 
@@ -19,24 +19,24 @@ export function AuthLayout() {
   const { t } = useTranslation()
 
   return (
-    <div className="grid min-h-[calc(100svh-8rem)] lg:min-h-[calc(100svh-4rem)] lg:grid-cols-2">
-      <aside className="relative isolate hidden overflow-hidden bg-[#111820] text-white lg:grid lg:grid-rows-[auto_1fr] lg:p-12 xl:p-16">
+    <div className="grid min-h-[calc(100svh-8rem)] min-w-0 lg:min-h-[calc(100svh-5rem)] lg:grid-cols-2">
+      <aside className="relative isolate hidden overflow-hidden border-r border-sidebar-border bg-sidebar text-sidebar-foreground lg:grid lg:grid-rows-[auto_1fr] lg:p-12 xl:p-16">
         <div
           aria-hidden="true"
           className="pointer-events-none absolute inset-0"
           style={sideGlowStyle}
         />
 
-        <span className="relative text-sm font-semibold tracking-[0.02em]">
-          {t('appTitle')}
+        <span className="relative text-lg font-extrabold tracking-tight">
+          ADL 5:8
         </span>
 
         <div className="relative flex items-center">
           <div className="max-w-xl">
-            <h2 className="text-4xl leading-[1.1] font-semibold tracking-[-0.03em] text-white xl:text-5xl">
+            <h2 className="text-4xl leading-[1.1] font-extrabold tracking-[-0.03em] text-sidebar-foreground xl:text-5xl">
               {t('auth.sideTitle')}
             </h2>
-            <p className="mt-5 max-w-md text-base leading-relaxed text-slate-400">
+            <p className="mt-5 max-w-md text-base leading-relaxed text-muted-foreground">
               {t('auth.sideDescription')}
             </p>
           </div>

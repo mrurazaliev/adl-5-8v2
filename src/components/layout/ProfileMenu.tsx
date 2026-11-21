@@ -68,11 +68,11 @@ export function ProfileMenu() {
           type="button"
           variant="ghost"
           size="sm"
-          className="h-9 gap-2 rounded-lg px-1.5 text-sm hover:bg-accent hover:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring sm:px-2"
+          className="h-10 gap-2 rounded-full border border-border bg-card px-1.5 text-sm hover:bg-hover hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring sm:pr-3"
           aria-label={t('pages.profile.menu')}
         >
           <Avatar className="size-7">
-            <AvatarFallback className="bg-primary/10 text-xs font-semibold text-primary">
+            <AvatarFallback className="bg-primary-gradient text-xs font-extrabold text-primary-foreground">
               {initial}
             </AvatarFallback>
           </Avatar>
@@ -91,7 +91,7 @@ export function ProfileMenu() {
       >
         <DropdownMenuLabel className="flex items-center gap-3 py-2">
           <Avatar className="size-9">
-            <AvatarFallback className="bg-primary/10 text-sm font-semibold text-primary">
+            <AvatarFallback className="bg-primary-gradient text-sm font-extrabold text-primary-foreground">
               {initial}
             </AvatarFallback>
           </Avatar>

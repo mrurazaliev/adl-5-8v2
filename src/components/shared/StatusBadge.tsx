@@ -19,7 +19,7 @@ const labels: Record<string, string> = {
 
 const tones: Record<string, StatusTone> = {
   active: 'primary',
-  pending: 'warning',
+  pending: 'secondary',
   overdue: 'danger',
   paid: 'success',
   completed: 'success',
@@ -28,11 +28,11 @@ const tones: Record<string, StatusTone> = {
 }
 
 const toneClasses: Record<StatusTone, string> = {
-  primary: 'bg-primary/10 text-primary dark:bg-primary/20',
-  success: 'bg-success/10 text-success dark:bg-success/20',
-  warning: 'bg-warning/15 text-warning dark:bg-warning/20',
-  danger: 'bg-danger/10 text-danger dark:bg-danger/20',
-  secondary: 'bg-secondary/10 text-secondary dark:bg-secondary/20',
+  primary: 'border-primary/30 bg-primary/15 text-primary-light',
+  success: 'border-success/30 bg-success/10 text-success',
+  warning: 'border-warning/30 bg-warning/10 text-warning',
+  danger: 'border-danger/30 bg-danger/10 text-danger',
+  secondary: 'border-border bg-muted/50 text-muted-foreground',
 }
 
 export function StatusBadge({ status, tone }: StatusBadgeProps) {
@@ -41,7 +41,7 @@ export function StatusBadge({ status, tone }: StatusBadgeProps) {
   return (
     <Badge
       variant="outline"
-      className={cn('border-transparent', toneClasses[resolvedTone])}
+      className={cn(toneClasses[resolvedTone])}
     >
       {labels[status] ?? status}
     </Badge>

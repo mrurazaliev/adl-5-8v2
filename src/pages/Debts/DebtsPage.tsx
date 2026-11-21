@@ -183,7 +183,7 @@ export default function DebtsPage() {
                 <TableCell className="font-medium">{contactName(debt.contact_id)}</TableCell>
                 <TableCell>{t(`pages.debts.${debt.direction}`)}</TableCell>
                 <TableCell className="whitespace-nowrap tabular-nums">{debt.amount} {debt.currency}</TableCell>
-                <TableCell><Badge variant="outline" className={debt.status === 'paid' ? 'bg-success/10 text-success' : debt.status === 'partial' ? 'bg-primary/10 text-primary' : 'bg-warning/10 text-warning'}>{t(`pages.debts.${debt.status}`)}</Badge></TableCell>
+                <TableCell><Badge variant="outline" className={debt.status === 'paid' ? 'border-success/30 bg-success/10 text-success' : debt.status === 'partial' ? 'border-primary/30 bg-primary/15 text-primary-light' : 'border-border bg-muted/50 text-muted-foreground'}>{t(`pages.debts.${debt.status}`)}</Badge></TableCell>
                 <TableCell className="whitespace-nowrap">{debt.due_date?.slice(0, 10) ?? '—'}</TableCell>
                 <TableCell className="max-w-60"><p className="line-clamp-2 break-words">{debt.description || '—'}</p></TableCell>
                 <TableCell><div className="flex justify-end gap-1">

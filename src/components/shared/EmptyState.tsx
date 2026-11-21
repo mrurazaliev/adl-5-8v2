@@ -15,13 +15,13 @@ export function EmptyState({
   onAction,
 }: EmptyStateProps) {
   return (
-    <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-border p-10 text-center">
-      <span className="grid size-12 place-items-center rounded-full bg-muted text-muted-foreground">
+    <div className="flex flex-col items-center justify-center gap-4 rounded-[16px] border border-dashed border-border bg-card/40 px-5 py-10 text-center sm:px-10">
+      <span className="grid size-12 place-items-center rounded-2xl border border-primary/15 bg-primary/10 text-primary-light">
         <Inbox className="size-5" />
       </span>
       <div className="space-y-1">
-        <p className="text-sm font-semibold">{title}</p>
-        <p className="max-w-sm text-sm text-muted-foreground">{description}</p>
+        <p className="text-base font-bold">{title}</p>
+        <p className="max-w-sm text-[13px] leading-relaxed text-muted-foreground">{description}</p>
       </div>
       {actionLabel && onAction && (
         <Button type="button" variant="outline" size="sm" onClick={onAction}>

@@ -38,7 +38,7 @@ export function SidebarNavigation({
   const { t } = useTranslation()
 
   return (
-    <nav className={cn('flex flex-col gap-1', className)} aria-label={t('navigation')}>
+    <nav className={cn('flex flex-col gap-1.5', className)} aria-label={t('navigation')}>
       {items.map((item) => (
         <NavLink
           key={item.to}
@@ -47,15 +47,15 @@ export function SidebarNavigation({
           onClick={onNavigate}
           className={({ isActive }) =>
             cn(
-              'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors',
+              'sidebar-link flex min-h-11 items-center gap-3 rounded-[10px] px-3 py-2.5 text-sm font-semibold transition-[color,background-color,box-shadow] duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sidebar-ring',
               isActive
-                ? 'bg-sidebar-accent text-sidebar-accent-foreground shadow-sm'
-                : 'text-sidebar-foreground/70 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground',
+                ? 'bg-sidebar-accent text-sidebar-accent-foreground'
+                : 'text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground',
             )
           }
         >
-          <item.icon className="size-4" />
-          <span>{t(item.labelKey)}</span>
+          <item.icon className="size-[18px] shrink-0" />
+          <span className="min-w-0 break-words">{t(item.labelKey)}</span>
         </NavLink>
       ))}
     </nav>
