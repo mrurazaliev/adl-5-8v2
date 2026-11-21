@@ -29,6 +29,16 @@ dist-ssr
 *.sw?
 
 # Temporary files
+# Local development context (keep on disk)
+AGENTS.md
+CODING_STYLE.md
+PROJECT_CONTEXT.md
+TASKS.md
+DEVELOPMENT_LOG.md
+opencode.jsonc
+pg_hba.conf
+ADL58_V2_Designs/
+ADL58_V2_Premium_Fintech_Images.zip
 *.tmp
 *.temp
 *.cache
