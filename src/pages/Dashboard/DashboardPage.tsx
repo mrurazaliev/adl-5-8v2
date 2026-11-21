@@ -52,22 +52,17 @@ export default function DashboardPage() {
     <div className="dashboard-layout min-w-0 space-y-4 pb-20" aria-busy={isFetching}>
       <div className="mb-6 mt-1"><DashboardGreeting name={user?.name} /></div>
 
-      {isLoading ? (
-        <div role="status" aria-label={t('pages.dashboard.loading')} className="grid gap-4 md:grid-cols-[1.2fr_1fr_1fr]">
-          {[0, 1, 2].map((index) => <Skeleton key={index} className="h-36 w-full rounded-2xl" />)}
-        </div>
-      ) : isError ? (
+      <DashboardStats />
+      {isError ? (
         <Card className="border-destructive/30">
           <CardContent className="flex flex-wrap items-center justify-between gap-4" role="alert">
             <p className="text-sm text-destructive">{t('pages.dashboard.loadError')}</p>
             <Button type="button" variant="outline" disabled={isFetching} onClick={() => void refetch()}>{t('pages.dashboard.retry')}</Button>
           </CardContent>
         </Card>
-      ) : !summary ? (
+      ) : !isLoading && !summary ? (
         <EmptyState title={t('pages.dashboard.unavailable')} description={t('pages.dashboard.unavailableHint')} />
-      ) : (
-        <DashboardStats />
-      )}
+      ) : null}
 
       <section className="dashboard-main-grid grid min-w-0 items-stretch gap-4 xl:grid-cols-[minmax(0,1.85fr)_minmax(0,1fr)]">
         <Suspense fallback={<div role="status" aria-label={t('pages.dashboard.monthly.loading')}><Skeleton className="h-[30rem] w-full rounded-2xl" /></div>}>

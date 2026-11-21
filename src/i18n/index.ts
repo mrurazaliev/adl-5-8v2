@@ -3,6 +3,7 @@ import { archiveTranslations } from '@/i18n/archive'
 import { interfaceTranslations } from '@/i18n/interface'
 import { dashboardTranslations } from '@/i18n/dashboard'
 import { dashboardLayoutTranslations } from '@/i18n/dashboardLayout'
+import { dashboardBalanceTranslations } from '@/i18n/dashboardBalances'
 import { paymentsTranslations } from '@/i18n/payments'
 import { debtsTranslations } from '@/i18n/debts'
 import i18n from 'i18next'
@@ -120,6 +121,7 @@ const resources = {
             'Демонстрационная форма долга: я должен. Сохранение появится после подключения backend.',
           ...dashboardTranslations.ru,
           layout: dashboardLayoutTranslations.ru,
+          balances: dashboardBalanceTranslations.ru,
         },
         debts: debtsTranslations.ru,
         contacts: contactsTranslations.ru,
@@ -243,6 +245,7 @@ const resources = {
             'Шакли намоишии қарз: ман қарздор. Сабт пас аз пайвастшавӣ ба backend дастрас мешавад.',
           ...dashboardTranslations.tj,
           layout: dashboardLayoutTranslations.tj,
+          balances: dashboardBalanceTranslations.tj,
         },
         debts: debtsTranslations.tj,
         contacts: contactsTranslations.tj,
@@ -363,6 +366,7 @@ const resources = {
             'Demo debt form: I owe. Saving will be available after backend integration.',
           ...dashboardTranslations.en,
           layout: dashboardLayoutTranslations.en,
+          balances: dashboardBalanceTranslations.en,
         },
         debts: debtsTranslations.en,
         contacts: contactsTranslations.en,
