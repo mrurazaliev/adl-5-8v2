@@ -1,4 +1,3 @@
-import { baseApi } from '@/api/baseApi'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
@@ -26,14 +25,6 @@ import ProfilePage from '@/pages/Profile/ProfilePage'
 import LandingPage from '@/pages/Public/LandingPage'
 import UsersPage from '@/pages/Users/UsersPage'
 import ProtectedRoute from './components/shared/ProtextedRotues'
-
-if ('getDashboardSummary' in baseApi.endpoints) {
-  baseApi.enhanceEndpoints({
-    endpoints: {
-      getDashboardSummary: { providesTags: ['Dashboard'] },
-    },
-  })
-}
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

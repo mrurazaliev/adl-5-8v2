@@ -154,3 +154,16 @@
 - [x] Повторно проверены существующие Payments, интеграция Debts/Dashboard, схема, RU/TJ/EN, payloads, ответ {payment,debt}, ошибка 422 без повторного POST и refetch всех четырёх queries; подтверждённых проблем для переписывания нет.
 - [x] Повторные целевые TypeScript/ESLint, регрессия Debts, Vite build и smoke /debts и /payments прошли; полные проверки фиксируют прежние 8 TypeScript и 6 ESLint ошибок auth/Contacts.
 - [x] Подготовлен отдельный коммит feat: implement debt payments; посторонние auth/Contacts/Folders/Dashboard/design assets, Folder tag и заголовок Dashboard исключены. Push не выполняется; следующий этап не начинается.
+
+## Phase 6 — Dashboard, 2026-11-21
+
+- [x] Изучен и сохранён исходный незакоммиченный Dashboard; контракт summary сверен с backend SQL/OpenAPI без изменений backend.
+- [x] GET /api/dashboard/summary через существующий baseApi.injectEndpoints, простой Dashboard tag в endpoint; временный enhanceEndpoints из main.tsx удалён.
+- [x] Реальные total/pending/partial/paid, contacts_count и список до 10 непогашенных долгов со сроками и исходными валютами. Реальное распределение по статусам вместо мокового временного ряда.
+- [x] Три денежные карточки сохранены с пояснением недоступности: агрегаты смешивают валюты без группировки, frontend не отображает их как достоверные суммы и не рассчитывает замену.
+- [x] Loading/error/retry/empty/partial-data, ручное обновление, RU/TJ/EN. Плавающая кнопка ведёт в реальные /debts, без демо-формы.
+- [x] Изолированно проверены refetch после add/update/deleteDebt и addPayment, удаление неактивного кэша, повторный вход, Authorization и 401/retry. Серверные данные не копируются в useState/slice.
+- [x] Целевые TypeScript/ESLint, SSR всех языков/состояний, регрессия Debts/Payments, Vite build и dev smoke прошли. Прежние полные проверки: 8 ошибок TypeScript и 6 ESLint auth/Contacts, новых ошибок нет.
+- [ ] Авторизованный GET summary и реальные mutation-сценарии на подготовленных тестовых данных; сейчас живой GET без токена возвращает 401.
+- [ ] Визуально проверить мобильный/desktop Dashboard и Light/Dark в браузере: browser host недоступен, native Chrome отклонил ввод из-за активности пользователя. SSR не заменяет визуальный осмотр.
+- [ ] Отдельная задача backend при необходимости: предоставить агрегаты с группировкой по валютам; текущий frontend не меняет финансовый контракт.

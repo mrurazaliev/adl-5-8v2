@@ -929,3 +929,34 @@ Code Review: нет моковых долгов, смешения валют, р
 ### Состав коммита и дальнейшие границы
 
 В feat: implement debt payments включаются src/features/payments/{paymentsApi.ts,paymentsSchema.ts,DebtPayments.tsx}, src/i18n/payments.ts, PaymentsPage, интеграция DebtsPage, только Payment tag в baseApi, только Payments-переводы в i18n/index.ts и три документа контекста. Прежние Folder tag и заголовок Dashboard остаются в рабочем дереве, как и остальные изменения auth/Contacts/Folders/Dashboard/design assets. Git push не выполняется. Dashboard и исправление прежних ошибок — следующие отдельные задачи по решению владельца.
+
+## 2026-11-21 — Phase 6: Dashboard
+
+### Состояние и решения
+
+HEAD перед этапом — 61b89d7 (Payments). Незакоммиченные DashboardPage и dashboardApi прочитаны до изменений: запрос summary, три outstanding-карточки, ближайшие долги и loading/error уже существовали. Исходные DashboardPage/dashboardApi/i18n/main сохранены в node_modules/.tmp/dashboard-before; контрольные суммы посторонних исходников — node_modules/.tmp/dashboard-preservation.json. Эти локальные артефакты игнорируются Git. Чужие auth/Contacts/Folders/design assets не изменяются и не включаются в коммит.
+
+Прочитаны ../Debt_back/src/modules/dashboard/{dashboard.service,dashboard.controller,dashboard.routes}.ts, OpenAPI и общий NUMERIC parser только для сверки. GET /api/dashboard/summary защищён authenticate. totals/outstanding группируются по direction без currency; валюта итогов неизвестна, смешение валют возможно. Поэтому суммы трёх карточек не показываются, вместо них — локализованное пояснение недоступности. Frontend не рассчитывает свои финансовые итоги и не загружает дополнительные ресурсы для их восстановления. upcoming_due содержит исходную сумму и валюту каждого долга, а не остаток; выборка включает просроченные долги и сроки до CURRENT_DATE + 30 days, исключает paid, сортируется по due_date и ограничена 10 строками. Тексты страницы отражают этот контракт.
+
+### Реализация
+
+- dashboardApi: сохранены существующие интерфейсы и query, добавлен providesTags ['Dashboard'], nullable due_date соответствует OpenAPI. Общий createApi/store не менялся.
+- main.tsx: удалена временная регистрация тега через enhanceEndpoints; endpoint сам объявляет tag. Debt/Payment mutations уже инвалидируют Dashboard и сохранены без изменений.
+- DashboardPage: реальные counts.total/pending/partial/paid, contacts_count, распределение по статусам; исходные суммы/валюты/контакты/направления/статусы/даты отдельных долгов; локализованные Skeleton/error/retry/empty/отсутствующие поля и ручное обновление. Нет mockData, временных рядов, выдуманных транзакций, новых endpoints или Redux slice. Доли полос вычисляются только из количества записей, финансовых вычислений нет. Недостающие поля не подменяются нулём, нечисловые суммы не форматируются.
+- Сохранены карточки, responsive grid, общие theme tokens и плавающая кнопка. Вместо DemoActionDialog она ведёт на /debts. Старый shared DebtActionFab не удалён и не изменён.
+- src/i18n/dashboard.ts: RU/TJ/EN, подключение поверх прежних Dashboard-ключей; существующая чужая правка title в i18n/index.ts остаётся вне коммита.
+
+### Проверки
+
+- npx.cmd tsc -p node_modules/.tmp/tsconfig.dashboard.json --noEmit --incremental false и targeted ESLint Dashboard/API/i18n/main — успешно.
+- node node_modules/.tmp/dashboard-check.cjs — успешно: настоящий RTK Query с изолированным тестовым транспортом, GET summary/Authorization, refetch после add/update/deleteDebt и addPayment без настройки main.tsx; удаление неактивного кэша и повторная загрузка при возврате; 401/retry без изменения auth state. SSR реального DashboardPage проверен для RU/TJ/EN, loading/error/empty/partial-data, отсутствующих сумм/дат/валют, покрытие i18n и скрытие смешанных агрегатов. Тестовые данные находятся только в игнорируемом проверочном скрипте, не в приложении и не в БД.
+- node .git/debts-check.cjs и node node_modules/.tmp/payments-review.cjs — регрессии успешны.
+- npx.cmd tsc -b --noEmit, npm.cmd run typecheck и npm.cmd run build — те же 8 прежних ошибок: authApi/body, LoginPage/setSuccessMessage и AuthTests/authTests casing, RegisterPage/setServerError и отсутствующий response, ContactsPage/Controller/Folder/useGetFoldersQuery. Новых TypeScript ошибок нет; полный build останавливается до Vite.
+- npm.cmd run lint — те же 6 прежних no-unused-vars ошибок auth/Contacts. Новых ESLint ошибок нет.
+- npx.cmd vite build — успешно, 2735 модулей; предупреждение о JS-чанке ~860 kB (>500 kB).
+- npm.cmd run dev -- --host 127.0.0.1 --port 4198 --strictPort: /dashboard, /debts, /payments HTTP 200 (SPA shell). Backend /health HTTP 200, GET /api/dashboard/summary без токена HTTP 401. Авторизованные реальные сценарии не проверялись; реальные записи не изменялись.
+- Для визуального осмотра подготовлен отдельный SSR-предпросмотр с тестовыми данными вне product routes. Computer-use: browser access host unavailable; native Chrome отклонил действия (coordinate input geometry unavailable, затем user input detected). Визуальная адаптивность, темы и поведение в реальной сессии не подтверждены; ручная проверка остаётся в TASKS.md. Проверочные серверы закрыты.
+
+### Git и далее
+
+Коммит feat: complete real dashboard включает только DashboardPage, dashboardApi, Dashboard-переводы/их подключение, удаление временного Dashboard tag из main.tsx и три документа контекста. Folder tag в baseApi, чужой заголовок Dashboard и остальные посторонние изменения остаются вне коммита. Backend и конфигурация OpenCode не изменяются. Push не выполняется; Archive и общий Code Review автоматически не начинаются.
