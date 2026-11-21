@@ -872,3 +872,60 @@ DebtsPage переведена с mockData на GET /api/debts с серверн
 Code Review: нет моковых долгов, смешения валют, ручного статуса, оптимистического удаления или useEffect заполнения формы; id исключается из PATCH body; проверены NaN/Infinity/границы суммы/UUID/календарная дата, соответствие переводов и refetch list/detail/Dashboard. В прежнем Contacts обнаружено несоответствие: обязательный folder_id схемы отсутствует в форме. Оно оставлено владельцу, так как не связано с интеграцией долгов.
 
 Исходные незакоммиченные файлы скопированы в .git/debts-crud-backup-20261121-154009, включая working.patch/index.patch. Коммит долгов содержит только собственные изменения; старые Folder-тег и изменение заголовка Dashboard в i18n остаются вне него. Проверочные скрипты сохранены локально в .git/debts-check.cjs и .git/debts-smoke.cjs; целевой tsconfig — .git/tsconfig.debts.json. Для повторения: node .git/debts-check.cjs; npx tsc -p .git/tsconfig.debts.json --noEmit. Git push не выполнялся.
+
+## 2026-11-21 — Этап 5: Payments
+
+### Реализация
+
+- Добавлены src/features/payments/paymentsApi.ts, paymentsSchema.ts и DebtPayments.tsx. API использует только baseApi.injectEndpoints: GET /api/debts/:id/payments и POST /api/debts/:id/payments. Mutation типизирована фактическим ответом { payment, debt }; OpenAPI ошибочно описывает только Payment. PATCH/DELETE платежей отсутствуют и не добавлялись.
+- В просмотре долга доступна кнопка «История платежей»: реальные история и форма RHF/Zod, register/reset/handleSubmit/SubmitHandler, useState, без useEffect. История загружается после раскрытия, currentData и key по debt.id предотвращают показ другой истории. Форма остаётся смонтированной при обновлении долга, ввод сохраняется при ошибке; reset вызывается только после успешного POST. Кнопки и закрытие диалога блокируются во время сохранения.
+- Payment зарегистрирован рядом с Debt/Dashboard; providesTags ['Payment'], invalidatesTags ['Payment', 'Debt', 'Dashboard']. Используется существующая настройка тега Dashboard в main.tsx. Проверено обновление истории, detail, списка и Dashboard, включая повторную загрузку активных запросов.
+- Сумма переводится в число через valueAsNumber, Zod отсекает NaN/Infinity, <=0 и >1e9; note <=500. Необязательное локальное datetime-local преобразуется в ISO UTC; пустые note/paid_at исключаются из JSON, время по умолчанию задаёт сервер. Валюта отображается из долга, но не отправляется в POST.
+- Добавлены переводы RU/TJ/EN в src/i18n/payments.ts и подключены к существующему i18next. Старые моковые финансовые данные и несуществующее редактирование платежей на /payments заменены карточкой перехода к выбору реального долга. Sidebar, Header, темы и общий shell сохранены.
+
+### Контракт и финансовое поведение
+
+Исходники ../Debt_back/src/modules/debts/debts.schema.ts, debts.service.ts, debts.controller.ts, debts.routes.ts и src/docs/openapi.ts изучены только для чтения. Backend использует timestamptz для paid_at, принимает переплату и возвращает обновлённый долг. Реальный код addPayment проверен с изолированным адаптером БД: 100/30 -> partial, 10/10 -> paid, 10/15 -> paid. Обратный долг на разницу не создаётся. Остаток не возвращается, frontend его не вычисляет и статус не назначает. Это проверка кода сервиса в изоляции, без реальных записей PostgreSQL. Авторизация и Refresh Token не изменены.
+
+### Проверки и Code Review
+
+- Целевые npx tsc -p .git/tsconfig.payments.json --noEmit --incremental false и ESLint всех изменённых исходников — успешно.
+- Изолированные проверки схемы (числа/даты/длина), совпадения RU/TJ/EN ключей, реального RTK Query с тестовым транспортом — успешно: debtId, GET/POST, исключение debtId/currency/status из тела, {payment,debt}, обработка 422 без автоматического повторного POST, инвалидация и refetch истории/detail/списка/Dashboard.
+- node .git/debts-check.cjs — успешно: регрессия Debts CRUD, схема, фильтры, payloads, Authorization и инвалидация.
+- npx vite build — успешно, 2431 модуль; warning о JS-чанке >500 kB.
+- Dev smoke: /debts, /contacts, /folders — HTTP 200. Это проверка запуска SPA, не проверка диалогов в браузере.
+- Полные npx tsc -b --noEmit и npm run build не проходят из-за существующих auth/Contacts ошибок: неиспользуемые body/setSuccessMessage/setServerError/Controller/Folder/useGetFoldersQuery, отсутствующий response в RegisterPage, регистр AuthTests.tsx/authTests.tsx. Полный npm run lint содержит 6 прежних ошибок auth/Contacts; ошибок Payments нет. contactsSlice.ts уже отсутствует в рабочем дереве, команды этого этапа его не удаляли; исходная копия сохранена. Импортов contactsSlice не найдено.
+- Проверены сохранение формы при ошибке, блокировка повторной отправки и закрытия во время POST, отсутствие useEffect и ручных финансовых расчётов, отсутствие моковых платежей в интерфейсе. Найденный при интеграции BOM на второй строке DebtsPage исправлен.
+- /health — HTTP 200; GET истории без токена — 401. Авторизованной тестовой сессии нет: реальные POST, проверка частичного погашения на PostgreSQL и браузерная работа не проводились. Реальные финансовые записи не изменялись.
+
+### Git и сохранность
+
+Исходные посторонние изменения и затрагиваемые файлы сохранены в .git/payments-backup-20261121-155916 (working.patch, index.patch, files). Чужие auth/Contacts/Folders/Dashboard/design assets не включаются в коммит; старые Folder tag и заголовок Dashboard в i18n остаются незакоммиченными. Коммит: feat: implement debt payments. Git push не выполняется. Первоначальный технический сбой автоматического согласования записи устранён при продолжении задачи.
+
+### Далее
+
+Авторизованная браузерная проверка на специально подготовленных тестовых долгах; исправление прежних auth/Contacts ошибок отдельной задачей. Разницу при переплате backend не переносит в обратное направление — для изменения этого поведения нужна отдельная задача backend.
+
+## 2026-11-21 — Проверка и завершение коммита Payments
+
+### Фактическое состояние
+
+Рабочая директория и корень Git: C:/Users/User/Desktop/New folder, разрешённая область записи соответствует проекту. До завершения HEAD — 5201b91, index пуст; Payments существует в рабочем дереве, коммита ещё нет. Формулировка «Коммит: feat: implement debt payments» в предыдущей записи обозначала запланированный коммит. Устаревший вводный статус PROJECT_CONTEXT.md уточнён без удаления исторических решений.
+
+Проверены все изменённые файлы и новые исходники, включая посторонние auth/Contacts/Folders/Dashboard. Backend прочитан только для сверки GET/POST, схемы, ответа {payment,debt} и преобразования PostgreSQL NUMERIC в number. Изменений backend, авторизации, бизнес-правил и реальных финансовых записей нет. Подтверждённых проблем в существующей реализации Payments не найдено; исходники Payments не переписывались.
+
+### Проверки
+
+- npx.cmd tsc -b --noEmit, npm.cmd run typecheck, npm.cmd run build — 8 прежних TypeScript ошибок: authApi/body, LoginPage/setSuccessMessage и регистр AuthTests/authTests, RegisterPage/setServerError и отсутствующий response, ContactsPage/Controller/Folder/useGetFoldersQuery. Build останавливается на TypeScript до запуска Vite.
+- npm.cmd run lint — 6 прежних no-unused-vars ошибок в authApi/LoginPage/RegisterPage/ContactsPage; ошибок Payments нет.
+- npx.cmd tsc -p .git/tsconfig.payments.json --noEmit --incremental false и целевой ESLint payments/DebtsPage/PaymentsPage/i18n/baseApi — успешно.
+- node node_modules/.tmp/payments-review.cjs — успешно: границы amount/note/дат, соответствие и покрытие переводов RU/TJ/EN, реальные RTK Query endpoints с изолированным транспортом, Authorization, GET/POST и payload, ответ {payment,debt}, исключение пустых optional полей, ошибка 422 без повторного POST, фактический refetch истории/detail/списка/Dashboard. Это проверка frontend без запросов к реальным финансовым данным.
+- node .git/debts-check.cjs — регрессия Debts успешна.
+- npx.cmd vite build — успешно, 2431 модуль; предупреждение о JS-чанке 850.36 kB (>500 kB).
+- node node_modules/.tmp/payments-smoke.cjs — запуск через Vite API: /debts и /payments HTTP 200 (только SPA shell); backend /health 200, GET истории с тестовым UUID без токена 401. Сервер проверки закрыт. Авторизованные POST и браузерные сценарии не проводились.
+- PowerShell запрещает запуск npm.ps1/npx.ps1; использованы стандартные npm.cmd/npx.cmd без изменения системной политики.
+- git diff --check показывает только прежние trailing spaces в RegisterPage, вне Payments; staging Payments проверяется отдельно.
+
+### Состав коммита и дальнейшие границы
+
+В feat: implement debt payments включаются src/features/payments/{paymentsApi.ts,paymentsSchema.ts,DebtPayments.tsx}, src/i18n/payments.ts, PaymentsPage, интеграция DebtsPage, только Payment tag в baseApi, только Payments-переводы в i18n/index.ts и три документа контекста. Прежние Folder tag и заголовок Dashboard остаются в рабочем дереве, как и остальные изменения auth/Contacts/Folders/Dashboard/design assets. Git push не выполняется. Dashboard и исправление прежних ошибок — следующие отдельные задачи по решению владельца.

@@ -1,3 +1,4 @@
+import { paymentsTranslations } from '@/i18n/payments'
 import { debtsTranslations } from '@/i18n/debts'
 import i18n from 'i18next'
 import { initReactI18next } from 'react-i18next'
@@ -159,10 +160,7 @@ const resources = {
           title: 'Папки',
           subtitle: 'Категории для организации данных',
         },
-        payments: {
-          title: 'Платежи',
-          subtitle: 'История и статус платежных операций',
-        },
+        payments: paymentsTranslations.ru,
         users: {
           title: 'Пользователи',
           subtitle: 'Участники системы и их роли',
@@ -329,10 +327,7 @@ const resources = {
           title: 'Папкаҳо',
           subtitle: 'Категорияҳо барои ташкили маълумот',
         },
-        payments: {
-          title: 'Пардохтҳо',
-          subtitle: 'Таърих ва вазъи амалиётҳои пардохт',
-        },
+        payments: paymentsTranslations.tj,
         users: {
           title: 'Корбарон',
           subtitle: 'Иштирокчиён ва нақшҳои онҳо',
@@ -496,10 +491,7 @@ const resources = {
           title: 'Folders',
           subtitle: 'Categories for organizing data',
         },
-        payments: {
-          title: 'Payments',
-          subtitle: 'Payment history and status',
-        },
+        payments: paymentsTranslations.en,
         users: {
           title: 'Users',
           subtitle: 'System participants and their roles',

@@ -1,4 +1,5 @@
-﻿import { useState } from 'react'
+import { DebtPayments } from '@/features/payments/DebtPayments'
+import { useState } from 'react'
 import { Controller, useForm, type SubmitHandler } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useTranslation } from 'react-i18next'
@@ -30,6 +31,7 @@ export default function DebtsPage() {
   const [dateRequired, setDateRequired] = useState(false)
   const [deletingDebt, setDeletingDebt] = useState<Debt | null>(null)
   const [viewingId, setViewingId] = useState<string | null>(null)
+  const [paymentSaving, setPaymentSaving] = useState(false)
   const [filters, setFilters] = useState<DebtFilters>({})
   const { currentData: debts = [], isFetching, isError, refetch } = useGetDebtsQuery(filters)
   const {
@@ -265,20 +267,22 @@ export default function DebtsPage() {
         </AlertDialogContent>
       </AlertDialog>
 
-      <Dialog open={viewingId !== null} onOpenChange={(value) => { if (!value) setViewingId(null) }}>
-        <DialogContent className="max-h-[90dvh] overflow-y-auto">
+      <Dialog open={viewingId !== null} onOpenChange={(value) => { if (!value && !paymentSaving) setViewingId(null) }}>
+        <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-2xl" showCloseButton={!paymentSaving}>
           <DialogHeader><DialogTitle>{t('pages.debts.detailsTitle')}</DialogTitle><DialogDescription>{viewingId}</DialogDescription></DialogHeader>
-          {detailsLoading && <Skeleton className="h-40 w-full" />}
+          {detailsLoading && !viewedDebt && <Skeleton className="h-40 w-full" />}
           {detailsError && <div role="alert" className="space-y-3"><p>{t('pages.debts.detailsError')}</p><Button variant="outline" disabled={detailsLoading} onClick={() => void refetchDetails()}>{t('pages.debts.retry')}</Button></div>}
-          {!detailsLoading && !detailsError && viewedDebt && <dl className="grid grid-cols-[auto_1fr] gap-3 text-sm">
+          {viewedDebt && <><dl className="grid grid-cols-[auto_1fr] gap-3 text-sm">
             <dt className="text-muted-foreground">{t('pages.debts.contact')}</dt><dd className="break-words">{contactName(viewedDebt.contact_id)}</dd>
             <dt className="text-muted-foreground">{t('pages.debts.direction')}</dt><dd>{t(`pages.debts.${viewedDebt.direction}`)}</dd>
             <dt className="text-muted-foreground">{t('pages.debts.amount')}</dt><dd>{viewedDebt.amount} {viewedDebt.currency}</dd>
             <dt className="text-muted-foreground">{t('common.status')}</dt><dd>{t(`pages.debts.${viewedDebt.status}`)}</dd>
             <dt className="text-muted-foreground">{t('pages.debts.due_date')}</dt><dd>{viewedDebt.due_date?.slice(0, 10) ?? '—'}</dd>
             <dt className="text-muted-foreground">{t('pages.debts.description')}</dt><dd className="min-w-0 whitespace-pre-wrap break-words">{viewedDebt.description || '—'}</dd>
-          </dl>}
-          <DialogFooter><Button variant="outline" onClick={() => setViewingId(null)}>{t('pages.debts.close')}</Button></DialogFooter>
+          </dl>
+          <DebtPayments key={viewedDebt.id} debt={viewedDebt} disabled={detailsLoading || detailsError} onSavingChange={setPaymentSaving} />
+          </>}
+          <DialogFooter><Button variant="outline" disabled={paymentSaving} onClick={() => setViewingId(null)}>{t('pages.debts.close')}</Button></DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

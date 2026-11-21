@@ -140,3 +140,17 @@
 - [ ] Полные TypeScript/lint/build: устранение прежних ошибок contactsSlice/auth/Contacts — отдельная задача, чужие изменения сохранены.
 - [ ] Проверить авторизованный Debts/Contacts/Folders CRUD и браузерную работу с тестовой сессией. Сейчас защищённые GET возвращают 401 без токена.
 - [ ] Отдельно исправить прежнюю форму Contacts: обязательный folder_id схемы отсутствует в форме.
+
+## Этап 5 — Payments, 2026-11-21
+
+- [x] GET истории и POST платежа через baseApi.injectEndpoints с фактическим ответом {payment,debt}, простыми Payment/Debt/Dashboard tags.
+- [x] История и RHF/Zod-форма в просмотре долга: реальный debtId, загрузка по раскрытию, loading/error/retry/empty, блокировка повторной отправки, сохранение ввода при ошибке.
+- [x] RU/TJ/EN; ISO paid_at из локального времени; валюта только из долга, не отправляется в POST; ручных финансовых вычислений нет.
+- [x] /payments направляет к выбору долга, моковые платежи и несуществующие edit/delete действия удалены.
+- [x] Целевые TypeScript/ESLint, изолированные schema/API/service tests, регрессия Debts, Vite build и dev smoke прошли.
+- [ ] Полные TypeScript/lint/build: прежние ошибки auth/Contacts исправить отдельной задачей.
+- [ ] Проверить диалоги и авторизованные платежи на тестовых долгах с реальным backend. Сейчас проверен код сервиса в изоляции; реальные финансовые записи не менялись.
+- [ ] При необходимости отдельно согласовать backend-правило обратного долга при переплате: текущий сервер просто устанавливает paid.
+- [x] Повторно проверены существующие Payments, интеграция Debts/Dashboard, схема, RU/TJ/EN, payloads, ответ {payment,debt}, ошибка 422 без повторного POST и refetch всех четырёх queries; подтверждённых проблем для переписывания нет.
+- [x] Повторные целевые TypeScript/ESLint, регрессия Debts, Vite build и smoke /debts и /payments прошли; полные проверки фиксируют прежние 8 TypeScript и 6 ESLint ошибок auth/Contacts.
+- [x] Подготовлен отдельный коммит feat: implement debt payments; посторонние auth/Contacts/Folders/Dashboard/design assets, Folder tag и заголовок Dashboard исключены. Push не выполняется; следующий этап не начинается.
