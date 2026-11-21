@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { Outlet } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Menu, Moon, Sparkles, Sun } from 'lucide-react'
+import { Menu, Moon, Search, Sun } from 'lucide-react'
 import { useAppDispatch, useAppSelector } from '@/app/hooks'
 import { ProfileMenu } from '@/components/layout/ProfileMenu'
 import { SidebarNavigation } from '@/components/layout/SidebarNavigation'
@@ -37,20 +37,18 @@ export function AppShell() {
   return (
     <div className="app-shell min-h-svh min-w-0 bg-background">
       <aside className="fixed inset-y-0 left-0 z-30 hidden w-58 flex-col border-r border-sidebar-border bg-sidebar lg:flex">
-        <div className="flex min-h-24 items-center gap-3 px-6 py-5">
-          <span className="brand-mark grid size-9 shrink-0 place-items-center rounded-[11px] text-primary-foreground">
-            <Sparkles className="size-4" />
+        <div className="flex min-h-20 items-center gap-2.5 px-6 py-5">
+          <span className="brand-mark grid size-[30px] shrink-0 place-items-center rounded-[9px] text-xs font-extrabold text-primary-foreground">
+            5:8
           </span>
           <div className="min-w-0">
             <p className="truncate text-lg font-extrabold tracking-tight">ADL 5:8</p>
-            <p className="mt-0.5 truncate text-[11px] text-muted-foreground">
-              {t('subtitle')}
-            </p>
           </div>
         </div>
         <div className="flex-1 overflow-y-auto px-3.5 pb-6">
           <SidebarNavigation onNavigate={closeSidebar} />
         </div>
+        <div className="px-3.5 pb-5"><ProfileMenu placement="sidebar" /></div>
       </aside>
 
       <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
@@ -62,6 +60,7 @@ export function AppShell() {
           <div className="flex-1 overflow-y-auto px-3.5 pb-6">
             <SidebarNavigation onNavigate={closeSidebar} />
           </div>
+          <div className="px-3.5 pb-5"><ProfileMenu placement="sidebar" /></div>
         </SheetContent>
       </Sheet>
 
@@ -79,10 +78,11 @@ export function AppShell() {
           </Button>
 
           <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-extrabold tracking-tight">ADL 5:8 <span className="text-primary-light">V2</span></p>
-            <p className="hidden truncate text-xs text-muted-foreground sm:block">
-              {t('subtitle')}
-            </p>
+            <p className="truncate text-sm font-extrabold tracking-tight sm:hidden">ADL 5:8</p>
+            <div className="hidden max-w-[420px] items-center gap-2.5 rounded-xl border border-border bg-card px-3.5 py-2.5 text-xs text-muted-foreground sm:flex" aria-label={t('pages.dashboard.layout.searchUnavailable')}>
+              <Search className="size-4 shrink-0 opacity-60" aria-hidden="true" />
+              <span className="truncate">{t('pages.dashboard.layout.searchUnavailable')}</span>
+            </div>
           </div>
 
           <Select

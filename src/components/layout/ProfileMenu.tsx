@@ -18,8 +18,13 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { useLogoutMutation } from '@/features/auth/authApi'
 import { clearCredentials } from '@/features/auth/authSlice'
+import { cn } from '@/lib/utils'
 
-export function ProfileMenu() {
+interface ProfileMenuProps {
+  placement?: 'header' | 'sidebar'
+}
+
+export function ProfileMenu({ placement = 'header' }: ProfileMenuProps) {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const dispatch = useAppDispatch()
@@ -68,7 +73,7 @@ export function ProfileMenu() {
           type="button"
           variant="ghost"
           size="sm"
-          className="h-10 gap-2 rounded-full border border-border bg-card px-1.5 text-sm hover:bg-hover hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring sm:pr-3"
+          className={cn('h-10 gap-2 rounded-full border border-border bg-card px-1.5 text-sm hover:bg-hover hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring sm:pr-3', placement === 'sidebar' && 'h-auto w-full justify-start gap-3 rounded-[14px] p-3 sm:pr-3')}
           aria-label={t('pages.profile.menu')}
         >
           <Avatar className="size-7">
@@ -77,11 +82,12 @@ export function ProfileMenu() {
             </AvatarFallback>
           </Avatar>
 
-          <span className="hidden max-w-28 truncate sm:inline">
-            {displayName}
+          <span className={cn('hidden max-w-28 truncate text-left sm:inline', placement === 'sidebar' && 'block min-w-0 max-w-none flex-1')}>
+            <span className="block truncate font-bold">{displayName}</span>
+            {placement === 'sidebar' && <span className="mt-0.5 block truncate text-[11px] font-normal text-muted-foreground">{user?.email ?? t('pages.profile.emailUnavailable')}</span>}
           </span>
 
-          <ChevronDown className="size-4 text-muted-foreground" />
+          <ChevronDown className="size-4 shrink-0 text-muted-foreground" />
         </Button>
       </DropdownMenuTrigger>
 

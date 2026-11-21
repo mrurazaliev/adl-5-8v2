@@ -732,6 +732,15 @@
   --dialog-shadow: 0 24px 80px -24px #17213b40;
   --primary-shadow: 0 8px 24px -10px #8b5cf699, inset 0 0 0 1px #ffffff26;
   --nav-active-background: linear-gradient(90deg, #8b5cf62e, #22d3ee14);
+  --dashboard-name-gradient: linear-gradient(90deg, #087f91, #7141db 50%, #a32985);
+  --dashboard-net-background: radial-gradient(380px 240px at 100% 0%, #22d3ee80, transparent 65%), radial-gradient(360px 240px at 0% 100%, #ff6bd680, transparent 65%), linear-gradient(135deg, #5b3bff, #2a1a7a);
+  --dashboard-net-border: #a58bff;
+  --dashboard-net-text: #e8e0ff;
+  --dashboard-net-shade: #00000038;
+  --dashboard-kpi-tint: 12%;
+  --dashboard-in-text: #056447;
+  --dashboard-out-text: #a92041;
+  --dashboard-caption: #46516b;
   --chart-1: #7141db;
   --chart-2: #087f91;
   --chart-3: #087c59;
@@ -781,6 +790,11 @@
   --dialog-shadow: 0 24px 80px -24px #000000cc;
   --primary-shadow: 0 8px 24px -8px #a855f780, inset 0 0 0 1px #ffffff2e;
   --nav-active-background: linear-gradient(90deg, #8b5cf673, #22d3ee24);
+  --dashboard-name-gradient: linear-gradient(90deg, #22d3ee, #a855f7 50%, #ff6bd6);
+  --dashboard-kpi-tint: 26%;
+  --dashboard-in-text: #72ffcb;
+  --dashboard-out-text: #ffb1c1;
+  --dashboard-caption: #d5ddef;
   --chart-1: #c9b8ff;
   --chart-2: #22d3ee;
   --chart-3: #2ee6a6;
@@ -843,6 +857,106 @@
   .brand-mark {
     background-image: var(--primary-gradient);
     box-shadow: 0 0 24px -8px var(--primary);
+  }
+
+  .dashboard-name {
+    background-image: var(--dashboard-name-gradient);
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .dashboard-kpi {
+    position: relative;
+    min-height: 148px;
+    justify-content: center;
+    transition: transform 200ms, border-color 200ms, box-shadow 200ms;
+  }
+
+  .dashboard-kpi::before {
+    content: '';
+    position: absolute;
+    pointer-events: none;
+    top: -30px;
+    right: -30px;
+    width: 130px;
+    height: 130px;
+    border-radius: 50%;
+    background: radial-gradient(circle, color-mix(in srgb, var(--kpi-glow, var(--primary)) 40%, transparent), transparent 70%);
+  }
+
+  .dashboard-kpi:hover {
+    transform: translateY(-3px);
+    border-color: var(--primary);
+  }
+
+  .dashboard-kpi-net {
+    background-image: linear-gradient(var(--dashboard-net-shade), var(--dashboard-net-shade)), var(--dashboard-net-background);
+    border-color: var(--dashboard-net-border);
+    color: var(--dashboard-net-text);
+  }
+
+  .dashboard-kpi-net::after {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto;
+    height: 2px;
+    background-image: linear-gradient(90deg, transparent, var(--primary-light), transparent);
+  }
+
+  .dashboard-kpi-net [aria-label] {
+    color: var(--primary-foreground);
+    text-shadow: 0 2px 24px color-mix(in srgb, var(--cyan) 50%, transparent);
+  }
+
+  .dashboard-kpi-in {
+    --kpi-glow: var(--success);
+    background-image: linear-gradient(150deg, color-mix(in srgb, var(--success) var(--dashboard-kpi-tint), transparent), var(--card) 70%);
+    border-color: color-mix(in srgb, var(--success) 55%, transparent);
+  }
+
+  .dashboard-kpi-out {
+    --kpi-glow: var(--danger);
+    background-image: linear-gradient(150deg, color-mix(in srgb, var(--danger) var(--dashboard-kpi-tint), transparent), var(--card) 70%);
+    border-color: color-mix(in srgb, var(--danger) 55%, transparent);
+  }
+
+  .dashboard-kpi-in::before, .dashboard-kpi-out::before {
+    opacity: 0.25;
+  }
+
+  .dashboard-kpi-in h2, .dashboard-kpi-in [aria-label] {
+    color: var(--dashboard-in-text);
+  }
+
+  .dashboard-kpi-out h2, .dashboard-kpi-out [aria-label] {
+    color: var(--dashboard-out-text);
+  }
+
+  .dashboard-kpi-in p:last-child, .dashboard-kpi-out p:last-child {
+    color: var(--dashboard-caption);
+  }
+
+  .dashboard-main-grid > [data-slot="card"] {
+    height: 100%;
+  }
+
+  .dashboard-fab {
+    background-image: var(--primary-gradient);
+    box-shadow: 0 12px 32px -8px var(--primary);
+    transition: transform 200ms, box-shadow 200ms;
+  }
+
+  .dashboard-fab:hover {
+    transform: translateY(-3px) scale(1.04);
+    box-shadow: 0 16px 36px -8px var(--primary);
+  }
+
+  .dashboard-fab svg {
+    transition: transform 200ms;
+  }
+
+  .dashboard-fab:hover svg {
+    transform: rotate(90deg);
   }
 }
 

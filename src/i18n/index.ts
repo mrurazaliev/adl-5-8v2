@@ -2,6 +2,7 @@ import { contactsTranslations } from '@/i18n/contacts'
 import { archiveTranslations } from '@/i18n/archive'
 import { interfaceTranslations } from '@/i18n/interface'
 import { dashboardTranslations } from '@/i18n/dashboard'
+import { dashboardLayoutTranslations } from '@/i18n/dashboardLayout'
 import { paymentsTranslations } from '@/i18n/payments'
 import { debtsTranslations } from '@/i18n/debts'
 import i18n from 'i18next'
@@ -118,6 +119,7 @@ const resources = {
           iOweDescription:
             'Демонстрационная форма долга: я должен. Сохранение появится после подключения backend.',
           ...dashboardTranslations.ru,
+          layout: dashboardLayoutTranslations.ru,
         },
         debts: debtsTranslations.ru,
         contacts: contactsTranslations.ru,
@@ -240,6 +242,7 @@ const resources = {
           iOweDescription:
             'Шакли намоишии қарз: ман қарздор. Сабт пас аз пайвастшавӣ ба backend дастрас мешавад.',
           ...dashboardTranslations.tj,
+          layout: dashboardLayoutTranslations.tj,
         },
         debts: debtsTranslations.tj,
         contacts: contactsTranslations.tj,
@@ -359,6 +362,7 @@ const resources = {
           iOweDescription:
             'Demo debt form: I owe. Saving will be available after backend integration.',
           ...dashboardTranslations.en,
+          layout: dashboardLayoutTranslations.en,
         },
         debts: debtsTranslations.en,
         contacts: contactsTranslations.en,

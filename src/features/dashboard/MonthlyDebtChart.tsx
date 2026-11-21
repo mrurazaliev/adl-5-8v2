@@ -63,24 +63,24 @@ export default function MonthlyDebtChart() {
   }
 
   return (
-    <Card className="min-w-0 border-border/70 shadow-sm" aria-busy={isFetching}>
-      <CardHeader className="gap-4 sm:flex sm:flex-row sm:items-start sm:justify-between">
-        <div className="min-w-0 space-y-2">
+    <Card className="dashboard-monthly min-w-0 shadow-card" aria-busy={isFetching}>
+      <CardHeader className="flex flex-wrap items-start justify-between gap-3">
+        <div className="min-w-0 flex-1 basis-48 space-y-1.5">
           <CardTitle>{t('pages.dashboard.monthly.title')}</CardTitle>
           <CardDescription>{t('pages.dashboard.monthly.description')}</CardDescription>
         </div>
-        <div className="flex flex-wrap gap-3">
+        <div className="flex shrink-0 flex-wrap gap-2">
           <div className="space-y-1">
-            <label htmlFor="monthly-debt-year" className="text-xs text-muted-foreground">{t('pages.dashboard.monthly.year')}</label>
+            <label htmlFor="monthly-debt-year" className="sr-only">{t('pages.dashboard.monthly.year')}</label>
             <Select value={String(year)} onValueChange={(value) => setYear(Number(value))} disabled={isLoading}>
-              <SelectTrigger id="monthly-debt-year" className="w-28"><SelectValue /></SelectTrigger>
+              <SelectTrigger id="monthly-debt-year" size="sm" className="w-22 rounded-full text-xs"><SelectValue /></SelectTrigger>
               <SelectContent>{years.map((option) => <SelectItem key={option} value={String(option)}>{option}</SelectItem>)}</SelectContent>
             </Select>
           </div>
           <div className="space-y-1">
-            <label htmlFor="monthly-debt-currency" className="text-xs text-muted-foreground">{t('pages.dashboard.monthly.currency')}</label>
+            <label htmlFor="monthly-debt-currency" className="sr-only">{t('pages.dashboard.monthly.currency')}</label>
             <Select value={currency} onValueChange={setSelectedCurrency} disabled={isLoading || currencies.length < 2}>
-              <SelectTrigger id="monthly-debt-currency" className="w-28"><SelectValue placeholder={t('pages.dashboard.monthly.noCurrency')} /></SelectTrigger>
+              <SelectTrigger id="monthly-debt-currency" size="sm" className="w-22 rounded-full text-xs"><SelectValue placeholder={t('pages.dashboard.monthly.noCurrency')} /></SelectTrigger>
               <SelectContent>{currencies.map((option) => <SelectItem key={option} value={option}>{option}</SelectItem>)}</SelectContent>
             </Select>
           </div>
@@ -104,24 +104,23 @@ export default function MonthlyDebtChart() {
           <>
             <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-muted-foreground">
               <p>{t('pages.dashboard.monthly.amount', { currency })}</p>
-              <ul className="flex flex-wrap gap-x-5 gap-y-2 text-sm">
+              <ul className="flex flex-wrap gap-x-4 gap-y-2 text-xs">
                 {directions.map(({ key, color }) => <li key={key} className="flex items-center gap-2">
                   <span className="h-0.5 w-5 rounded-full" style={{ backgroundColor: color }} />{t(`pages.dashboard.monthly.${key}`)}
                 </li>)}
               </ul>
             </div>
-            <div className="h-72 min-w-0 sm:h-80" role="group" aria-label={t('pages.dashboard.monthly.chartLabel', { year, currency })}>
+            <div className="h-56 min-w-0 sm:h-64" role="group" aria-label={t('pages.dashboard.monthly.chartLabel', { year, currency })}>
               <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                 <LineChart data={points} margin={{ top: 16, right: 12, bottom: 4, left: 0 }} accessibilityLayer>
                   <CartesianGrid vertical={false} stroke="var(--border)" strokeDasharray="3 4" />
                   <XAxis dataKey="month" tickFormatter={(month: number) => monthName(month, 'short')} tickLine={false} axisLine={false} minTickGap={14} interval="preserveStartEnd" tick={{ fill: 'var(--muted-foreground)', fontSize: 12 }} dy={8} height={36} />
                   <YAxis tickFormatter={formatAxis} domain={[0, 'auto']} allowDecimals={false} tickLine={false} axisLine={false} width={64} tick={{ fill: 'var(--muted-foreground)', fontSize: 12 }} />
                   <Tooltip content={(props) => <MonthlyDebtTooltip {...props} year={year} currency={currency} locale={locale} />} cursor={{ stroke: 'var(--border)', strokeDasharray: '4 4' }} isAnimationActive={false} />
-                  {directions.map(({ key, color }) => <Line key={key} type="monotone" dataKey={key} name={t(`pages.dashboard.monthly.${key}`)} stroke={color} strokeWidth={2.5} dot={{ r: 3, fill: 'var(--card)', strokeWidth: 2 }} activeDot={{ r: 6, fill: color, stroke: 'var(--background)', strokeWidth: 3 }} isAnimationActive={false} />)}
+                  {directions.map(({ key, color }) => <Line key={key} type="monotone" dataKey={key} name={t(`pages.dashboard.monthly.${key}`)} stroke={color} strokeWidth={2.5} style={{ filter: `drop-shadow(0 0 4px ${color})` }} dot={{ r: 3, fill: 'var(--card)', strokeWidth: 2 }} activeDot={{ r: 6, fill: color, stroke: 'var(--background)', strokeWidth: 3 }} isAnimationActive={false} />)}
                 </LineChart>
               </ResponsiveContainer>
             </div>
-            <p className="text-xs text-muted-foreground">{t('pages.dashboard.monthly.zeroHint')}</p>
             <details className="rounded-lg border border-border px-3 py-2 text-sm">
               <summary className="cursor-pointer font-medium">{t('pages.dashboard.monthly.table')}</summary>
               <div className="mt-3 overflow-x-auto">
@@ -136,7 +135,11 @@ export default function MonthlyDebtChart() {
             </details>
           </>
         )}
-        <p className="text-xs leading-relaxed text-muted-foreground">{t('pages.dashboard.monthly.sourceHint', { timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone })}</p>
+        <details className="text-xs leading-relaxed text-muted-foreground">
+          <summary className="w-fit cursor-pointer rounded-md focus-visible:outline-2 focus-visible:outline-ring">{t('pages.dashboard.layout.chartInfo')}</summary>
+          <p className="mt-2">{t('pages.dashboard.monthly.zeroHint')}</p>
+          <p className="mt-2">{t('pages.dashboard.monthly.sourceHint', { timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone })}</p>
+        </details>
       </CardContent>
     </Card>
   )
